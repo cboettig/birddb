@@ -1,0 +1,32 @@
+Package: birddb
+Version: 0.1.0
+Title: Local Database Interface to eBird
+Description: Yet another package for working with 'eBird' data in R.  This package
+  is similar to 'auk' but provides a relational database interface. This allows
+  users to query the data using familiar operations such as 'dplyr'. The 
+  high-performance backend is made possible by 'parquet' and 'duckdb'.
+Authors@R: c(
+            person("Carl", "Boettiger", , "cboettig@gmail.com", c("aut", "cre"),
+                   comment = c(ORCID = "0000-0002-1642-628X"))
+            )
+License: MIT + file LICENSE
+Encoding: UTF-8
+ByteCompile: true
+Depends: R (>= 4.0)
+Imports:
+    arrow,
+    duckdb,
+    DBI,
+    dplyr
+Suggests:
+    spelling,
+    testthat,
+    covr,
+    knitr,
+    rmarkdown,
+    progress
+URL: https://github.com/cboettig/birddb
+BugReports: https://github.com/cboettig/birddb
+Language: en-US
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
