@@ -7,7 +7,7 @@
 import_ebird(tarfile)
 }
 \arguments{
-\item{tarfile}{path to the copy of ebd_rel<DATE>.tar file you downloaded}
+\item{tarfile}{path to the copy of \verb{ebd_rel<DATE>.tar} file you downloaded}
 }
 \description{
 Given a path to the ebird tarfile, this function will extract and import the

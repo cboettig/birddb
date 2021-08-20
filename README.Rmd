@@ -1,0 +1,97 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+
+
+Sys.setenv("BIRDDB_HOME"=tempdir())
+```
+
+# birddb
+
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/cboettig/birddb/workflows/R-CMD-check/badge.svg)](https://github.com/cboettig/birddb/actions)
+[![Codecov test coverage](https://codecov.io/gh/cboettig/birddb/branch/main/graph/badge.svg)](https://codecov.io/gh/cboettig/birddb?branch=main)
+[![CRAN status](https://www.r-pkg.org/badges/version/birddb)](https://CRAN.R-project.org/package=birddb)
+<!-- badges: end -->
+
+The goal of `birddb` is to provide a relational database interface to a local copy of eBird.  `birddb` works by importing the text-based ebird file into a local parquet file using [arrow](https://cran.r-project.org/package=arrow), which can be queried as a relational database using the familiar `dplyr` interface.
+`dplyr` translates R-based queries into SQL commands which are past to [`duckdb`](https://duckdb.org), which then queries the parquet database. Unlike the native `arrow` interface, `duckdb` supports the full set of SQL instructions, including windowed operations like `group_by`+`summarise` as well as table joins.
+
+
+## Installation
+
+You can install the released version of `birddb` from [CRAN](https://CRAN.R-project.org) with:
+
+``` r
+install.packages("birddb")
+```
+
+And the development version from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("cboettig/birddb")
+```
+## Getting Started
+
+
+
+```{r}
+library(birddb)
+library(dplyr)
+```
+
+Before you can use `birddb` you will need to download the latest version of eBird from http://ebird.org/ebird/data/download.
+Once you have obtained a downloaded copy of the `tar` file, `birddb` can import it for you:
+The one-time import of the full data dump is a little slow (about 1 hr in my benchmark) due to the time required to extract the 
+tar file and convert the text data into parquet format.
+
+For illustration & testing purposes, we will use the small eBird sample data, included in the package for convenience and testing purposes:
+
+```{r}
+tarball <- system.file("extdata", "ebd_sample.tar", package="birddb", mustWork = TRUE)
+```
+
+Importing will now create the local parquet-based copies in the default directory given by `ebird_data_dir()`.
+Users can set an alternative location by setting the environmental variable `BIRDDB_HOME` to the desired path.
+
+```{r}
+import_ebird(tarball)
+```
+
+
+Once the data have been downloaded and imported successfully, a user can access the full ebird record quite quickly:
+
+```{r}  
+df <- ebird()
+df
+```
+
+Now, we can use `dplyr` to perform standard queries:
+
+```{r}
+colnames(df)
+```
+
+```{r}
+df %>% count(`SCIENTIFIC NAME`, sort=TRUE)
+```
+
+
+
+```{r include=FALSE}
+Sys.unsetenv("BIRDDB_HOME")
+
+```
+
+

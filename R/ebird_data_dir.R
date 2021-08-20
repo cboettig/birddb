@@ -18,6 +18,11 @@ ebird_data_dir <- function() {
 ebird_parquet_files <- function() {
   dir <- file.path(ebird_data_dir(), "parquet")
   # List of all parquet files
-  list.files(dir, pattern = "[.]parquet", full.names = TRUE, recursive = TRUE)
+  file <- list.files(dir, pattern = "[.]parquet", 
+                     full.names = TRUE, recursive = TRUE)
+  
+  ## duckdb does not exploit partitioning
+  #paste0(dir, "/*/*/*/*")  
+  file
 }
 

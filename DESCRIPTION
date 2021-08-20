@@ -17,10 +17,11 @@ Imports:
     arrow,
     duckdb,
     DBI,
-    dplyr
+    dplyr,
+    dbplyr
 Suggests:
     spelling,
-    testthat,
+    testthat (>= 3.0.0),
     covr,
     knitr,
     rmarkdown,
@@ -30,3 +31,4 @@ BugReports: https://github.com/cboettig/birddb
 Language: en-US
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
+Config/testthat/edition: 3

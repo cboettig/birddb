@@ -3,22 +3,11 @@
 #' 
 #' @export
 ebird <- function() {
-  
   assert_ebird_imported()
-  
-  tblname <- "ebd"
-  parquet <- ebird_parquet_files()
-  conn <- DBI::dbConnect(duckdb::duckdb())
-  
-  ## Create a "View" in duckdb to the parquet file
-  query <- paste0("CREATE VIEW '", tblname,
-                  "' AS SELECT * FROM parquet_scan('",
-                  parquet, "');")
-  DBI::dbSendQuery(conn, query)
-  
-  ## Creates a lazy remote connection using `dplyr::tbl`
-  dplyr::tbl(conn, tblname)
+  conn <- ebird_conn()
+  dplyr::tbl(conn, "ebd")
 }
+
 
 
 assert_ebird_imported <- function(){
