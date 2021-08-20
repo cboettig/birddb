@@ -8,6 +8,8 @@
 #' This may be desirable when multiple users of the same machine or server want
 #' to access a single copy of the ebird data.
 #' @export
+#' @examples
+#' ebird_data_dir()
 ebird_data_dir <- function() {
   Sys.getenv("BIRDDB_HOME", 
              tools::R_user_dir("birddb", "data")
@@ -24,5 +26,20 @@ ebird_parquet_files <- function() {
   ## duckdb does not exploit partitioning
   #paste0(dir, "/*/*/*/*")  
   file
+}
+
+#' Provide path to a small subset of ebird data
+#' 
+#' Sample data is based on the official sample download from July 2021.
+#' Sample is modified slightly to better match the official full download:
+#' archive uses `tar` format instead of `zip`, and the `ebd_*` table is 
+#' compressed with `gzip`, as in the full tar archive distributions.
+#' This data should be used for testing purposes only.
+#' @export
+#' @examples
+#' ebird_sample_data()
+ebird_sample_data <- function(){
+  system.file("extdata", "ebd_sample.tar",
+              package="birddb", mustWork = TRUE)
 }
 

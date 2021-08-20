@@ -65,7 +65,7 @@ For illustration & testing purposes, we will use the small eBird sample
 data, included in the package for convenience and testing purposes:
 
 ``` r
-tarball <- system.file("extdata", "ebd_sample.tar", package="birddb", mustWork = TRUE)
+tar <- ebird_sample_data()
 ```
 
 Importing will now create the local parquet-based copies in the default
@@ -74,7 +74,7 @@ location by setting the environmental variable `BIRDDB_HOME` to the
 desired path.
 
 ``` r
-import_ebird(tarball)
+import_ebird(tar)
 ```
 
 Once the data have been downloaded and imported successfully, a user can

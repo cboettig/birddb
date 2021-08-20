@@ -7,6 +7,12 @@
 #' @param tarfile path to the copy of `ebd_rel<DATE>.tar` file you downloaded
 #' 
 #' @export
+#' @examples
+#' 
+#' Sys.setenv("BIRDDB_HOME"=tempdir())
+#' tar <- ebird_sample_data()
+#' import_ebird(tar)
+#' 
 import_ebird <- function(tarfile){
   
   source_dir <- tempfile("ebird_tmp")

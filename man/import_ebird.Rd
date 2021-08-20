@@ -13,3 +13,10 @@ import_ebird(tarfile)
 Given a path to the ebird tarfile, this function will extract and import the
 tar archive into a parquet-based database in your \code{\link[=ebird_data_dir]{ebird_data_dir()}}
 }
+\examples{
+
+Sys.setenv("BIRDDB_HOME"=tempdir())
+tar <- ebird_sample_data()
+import_ebird(tar)
+
+}

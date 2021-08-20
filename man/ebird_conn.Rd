@@ -11,7 +11,9 @@ Returns a database connection to the local eBird dataset.
 }
 \examples{
 
-conn <- ebird_conn()
-DBI::dbListTables(conn)
+Sys.setenv("BIRDDB_HOME"=tempdir())
+tar <- ebird_sample_data()
+import_ebird(tar)
+con <- ebird_conn()
 
 }

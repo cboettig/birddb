@@ -59,14 +59,14 @@ tar file and convert the text data into parquet format.
 For illustration & testing purposes, we will use the small eBird sample data, included in the package for convenience and testing purposes:
 
 ```{r}
-tarball <- system.file("extdata", "ebd_sample.tar", package="birddb", mustWork = TRUE)
+tar <- ebird_sample_data()
 ```
 
 Importing will now create the local parquet-based copies in the default directory given by `ebird_data_dir()`.
 Users can set an alternative location by setting the environmental variable `BIRDDB_HOME` to the desired path.
 
 ```{r}
-import_ebird(tarball)
+import_ebird(tar)
 ```
 
 

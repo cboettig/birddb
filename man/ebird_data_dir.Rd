@@ -14,3 +14,6 @@ setting their desired path in the environmental variable BIRDDB_HOME.
 This may be desirable when multiple users of the same machine or server want
 to access a single copy of the ebird data.
 }
+\examples{
+ebird_data_dir()
+}

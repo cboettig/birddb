@@ -2,6 +2,13 @@
 #' Return a remote data.frame connection to your local ebird database
 #' 
 #' @export
+#' @examples
+#' 
+#' Sys.setenv("BIRDDB_HOME"=tempdir())
+#' tar <- ebird_sample_data()
+#' import_ebird(tar)
+#' df <- ebird()
+#' 
 ebird <- function() {
   assert_ebird_imported()
   conn <- ebird_conn()

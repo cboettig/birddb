@@ -3,4 +3,5 @@
 export(ebird)
 export(ebird_conn)
 export(ebird_data_dir)
+export(ebird_sample_data)
 export(import_ebird)
