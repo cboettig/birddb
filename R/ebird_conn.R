@@ -16,17 +16,22 @@ ebird_conn <- function() {
   tblname <- "ebd"
   parquet <- ebird_parquet_files()
   
-  ## Seems to use ~ 9 GB RAM still -- maybe just duckdb taking advantage of available RAM
-  conn <- DBI::dbConnect(duckdb::duckdb())
+  ## Is it worth persisting the duckdb connection on disk to avoid
+  ## recreating the View? (~ 9m operation)
+  conn <- DBI::dbConnect(duckdb::duckdb(), 
+                         file.path(ebird_data_dir(), "database"))
+  #conn <- DBI::dbConnect(duckdb::duckdb())
+  
+  #limit <- 4
+  #DBI::dbExecute(con, paste0("PRAGMA memory_limit='", limit, "GB'"))
   
   ## Create a "View" in duckdb to the parquet file
-  query <- paste0("CREATE VIEW '", tblname,
+  if(! tblname %in% DBI::dbListTables(conn)){
+    query <- paste0("CREATE VIEW '", tblname,
                   "' AS SELECT * FROM parquet_scan('",
                   parquet, "');")
-  
-  
-  DBI::dbSendQuery(conn, query)
-  
+    DBI::dbSendQuery(conn, query)
+  }
   conn
   
 }

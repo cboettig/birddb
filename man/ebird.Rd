@@ -4,7 +4,10 @@
 \alias{ebird}
 \title{Return a remote data.frame connection to your local ebird database}
 \usage{
-ebird()
+ebird(conn = ebird_conn())
+}
+\arguments{
+\item{conn}{a connection to the local ebird database, see \verb{[ebird_conn]}.}
 }
 \description{
 Return a remote data.frame connection to your local ebird database

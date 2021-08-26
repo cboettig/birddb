@@ -1,6 +1,7 @@
 
 #' Return a remote data.frame connection to your local ebird database
 #' 
+#' @param conn a connection to the local ebird database, see `[ebird_conn]`.
 #' @export
 #' @examples
 #' 
@@ -9,9 +10,8 @@
 #' import_ebird(tar)
 #' df <- ebird()
 #' 
-ebird <- function() {
+ebird <- function(conn = ebird_conn()) {
   assert_ebird_imported()
-  conn <- ebird_conn()
   dplyr::tbl(conn, "ebd")
 }
 

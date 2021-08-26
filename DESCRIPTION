@@ -15,7 +15,7 @@ ByteCompile: true
 Depends: R (>= 4.0)
 Imports:
     arrow,
-    duckdb,
+    duckdb (>= 0.2.9),
     DBI,
     dplyr,
     dbplyr
