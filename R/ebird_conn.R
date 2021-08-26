@@ -35,3 +35,18 @@ ebird_conn <- function() {
   conn
   
 }
+
+
+## 
+ebird_conn_arrow <- function() {
+  con <- DBI::dbConnect(duckdb::duckdb())
+  dir <- file.path(ebird_data_dir(), "parquet")
+  
+  # ds <- arrow_open_ebird_txt("/minio/shared-data/ebd_relJul-2021.txt.gz", dir)
+  ds <- arrow::open_dataset(dir)
+  ## OOM & crashes
+  duckdb::duckdb_register_arrow(con, "ebd", ds)
+  con
+}
+
+

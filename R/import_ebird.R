@@ -16,11 +16,28 @@
 import_ebird <- function(tarfile){
   
   source_dir <- tempfile("ebird_tmp")
+  dest <- file.path(ebird_data_dir(), "parquet")
+  
   dir.create(source_dir, recursive = TRUE)
-  
   utils::untar(tarfile = tarfile, exdir = source_dir)
-  ebd <-list.files(source_dir, pattern="ebd.*\\.txt\\.gz", full.names = TRUE, recursive = TRUE)
+  ebd <-list.files(source_dir, pattern="ebd.*\\.txt\\.gz", 
+                   full.names = TRUE, recursive = TRUE)
   
+  
+  ds <- arrow_open_ebird_txt(ebd, dest)
+  
+  # Consider alternative partitions that might speed common queries
+  # partitioning = c("COUNTRY", "SCIENTIFIC NAME")
+  # NOPE: duckdb doesn't yet support partitioning; multiple parquet files 
+  # can be read in but partition columns are lost this way.
+  
+  arrow::write_dataset(ds, dest, format="parquet")
+  
+  invisible(dest)
+}
+
+
+arrow_open_ebird_txt <- function(ebd, dest){
   ## a bit of ugliness in determining the schema arrow wants, can probably be improved now
   ds <- arrow::open_dataset(ebd, format="text", delim="\t")
   col_names <- names(ds)
@@ -35,19 +52,9 @@ import_ebird <- function(tarfile){
   sch <- do.call(arrow::schema, ebd_schema)
   
   # Once we have the schema, streaming is easy!
-  dest <- file.path(ebird_data_dir(), "parquet")
   ds <- arrow::open_dataset(ebd, format="text", delim="\t", schema = sch)
-  
-  # Consider alternative partitions that might speed common queries
-  # partitioning = c("COUNTRY", "STATE", "SUBSPECIES SCIENTIFIC NAME")
-  # NOPE: duckdb doesn't yet support partitioning; multiple parquet files 
-  # can be read in but partition columns are lost this way.
-  
-  arrow::write_dataset(ds, dest, format="parquet")
-  
-  invisible(dest)
+  ds
 }
-
 
 # Download URLs, eg https://download.ebird.org/ebd/prepackaged/ebd_relJul-2021.tar
 # Note, may take > 24hrs to complete
