@@ -27,9 +27,8 @@ import_ebird <- function(tarfile){
   ds <- arrow_open_ebird_txt(ebd, dest)
   
   # Consider alternative partitions that might speed common queries
-  # partitioning = c("COUNTRY", "SCIENTIFIC NAME")
-  # NOPE: duckdb doesn't yet support partitioning; multiple parquet files 
-  # can be read in but partition columns are lost this way.
+  # partitioning = c("COUNTRY")
+  # However, arrow supports at most 1024 partitions
   
   arrow::write_dataset(ds, dest, format="parquet")
   

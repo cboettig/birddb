@@ -5,8 +5,9 @@
 #' @export
 #' 
 #' @examples
+#' # tempdir settings are just for testing! Don't copy this.
+#' Sys.setenv("BIRDDB_HOME"=tempdir(), "BIRDDB_DUCKDB"=tempdir())
 #' 
-#' Sys.setenv("BIRDDB_HOME"=tempdir())
 #' tar <- ebird_sample_data()
 #' import_ebird(tar)
 #' con <- ebird_conn()
@@ -18,8 +19,7 @@ ebird_conn <- function() {
   
   ## Is it worth persisting the duckdb connection on disk to avoid
   ## recreating the View? (~ 9m operation)
-  conn <- DBI::dbConnect(duckdb::duckdb(), 
-                         file.path(ebird_data_dir(), "database"))
+  conn <- DBI::dbConnect(duckdb::duckdb(), file.path(ebird_db_dir()))
   #conn <- DBI::dbConnect(duckdb::duckdb())
   
   #limit <- 4

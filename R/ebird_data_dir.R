@@ -16,6 +16,13 @@ ebird_data_dir <- function() {
   )
 }
 
+# a location for duckdb view files.  very small, but should not be shared between users
+ebird_db_dir <- function() {
+  path <- Sys.getenv("BIRDDB_DUCKDB",
+             tools::R_user_dir("birddb", "data"))
+  dir.create(path, recursive = TRUE)
+  file.path(path, "database")
+}
 
 ebird_parquet_files <- function() {
   dir <- file.path(ebird_data_dir(), "parquet")
