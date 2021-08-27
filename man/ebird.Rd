@@ -15,7 +15,7 @@ Return a remote data.frame connection to your local ebird database
 \examples{
 
 # tempdir settings are just for testing! Don't copy this.
-Sys.setenv("BIRDDB_HOME"=tempdir(), "BIRDDB_DUCKDB"=tempdir())
+Sys.setenv("BIRDDB_HOME"=tempdir())
 
 
 tar <- ebird_sample_data()
