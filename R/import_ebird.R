@@ -26,6 +26,11 @@ import_ebird <- function(tarfile){
   
   ds <- arrow_open_ebird_txt(ebd, dest)
   
+  # clean up column names
+  col_names <- names(ds)
+  names(col_names) <- gsub("[/ ]", "_", tolower(col_names))
+  ds <- dplyr::select(ds, col_names)
+  
   # Consider alternative partitions that might speed common queries
   # partitioning = c("COUNTRY")
   # However, arrow supports at most 1024 partitions

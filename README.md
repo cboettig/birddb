@@ -85,63 +85,63 @@ df <- ebird()
 df
 #> # Source:   table<ebd> [?? x 47]
 #> # Database: duckdb_connection
-#>    `GLOBAL UNIQUE I… `LAST EDITED DATE`  `TAXONOMIC ORDE… CATEGORY `COMMON NAME`
-#>    <chr>             <dttm>                         <dbl> <chr>    <chr>        
-#>  1 URN:CornellLabOf… 2021-03-20 21:48:09            25797 species  Ruby-crowned…
-#>  2 URN:CornellLabOf… 2021-03-20 21:48:09            26950 species  Brown Thrash…
-#>  3 URN:CornellLabOf… 2021-04-03 23:33:38             7029 species  American Whi…
-#>  4 URN:CornellLabOf… 2021-03-20 21:48:09            31943 species  White-throat…
-#>  5 URN:CornellLabOf… 2021-03-20 21:48:09            32155 species  Eastern Towh…
-#>  6 URN:CornellLabOf… 2021-03-25 12:14:45             2316 species  White-winged…
-#>  7 URN:CornellLabOf… 2021-03-08 12:45:11            31986 species  Savannah Spa…
-#>  8 URN:CornellLabOf… 2021-03-19 21:23:57            21225 species  Tufted Titmo…
-#>  9 URN:CornellLabOf… 2021-03-03 21:23:28            27031 species  Eastern Blue…
-#> 10 URN:CornellLabOf… 2021-03-22 01:11:30             5942 species  Wilson's Sni…
-#> # … with more rows, and 42 more variables: SCIENTIFIC NAME <chr>,
-#> #   SUBSPECIES COMMON NAME <chr>, SUBSPECIES SCIENTIFIC NAME <chr>,
-#> #   OBSERVATION COUNT <chr>, BREEDING CODE <chr>, BREEDING CATEGORY <chr>,
-#> #   BEHAVIOR CODE <chr>, AGE/SEX <chr>, COUNTRY <chr>, COUNTRY CODE <chr>,
-#> #   STATE <chr>, STATE CODE <chr>, COUNTY <chr>, COUNTY CODE <chr>,
-#> #   IBA CODE <chr>, BCR CODE <dbl>, USFWS CODE <chr>, ATLAS BLOCK <chr>,
-#> #   LOCALITY <chr>, LOCALITY ID <chr>, LOCALITY TYPE <chr>, LATITUDE <dbl>, …
+#>    global_unique_iden… last_edited_date    taxonomic_order category common_name 
+#>    <chr>               <dttm>                        <dbl> <chr>    <chr>       
+#>  1 URN:CornellLabOfOr… 2021-03-20 21:48:09           25797 species  Ruby-crowne…
+#>  2 URN:CornellLabOfOr… 2021-03-20 21:48:09           26950 species  Brown Thras…
+#>  3 URN:CornellLabOfOr… 2021-04-03 23:33:38            7029 species  American Wh…
+#>  4 URN:CornellLabOfOr… 2021-03-20 21:48:09           31943 species  White-throa…
+#>  5 URN:CornellLabOfOr… 2021-03-20 21:48:09           32155 species  Eastern Tow…
+#>  6 URN:CornellLabOfOr… 2021-03-25 12:14:45            2316 species  White-winge…
+#>  7 URN:CornellLabOfOr… 2021-03-08 12:45:11           31986 species  Savannah Sp…
+#>  8 URN:CornellLabOfOr… 2021-03-19 21:23:57           21225 species  Tufted Titm…
+#>  9 URN:CornellLabOfOr… 2021-03-03 21:23:28           27031 species  Eastern Blu…
+#> 10 URN:CornellLabOfOr… 2021-03-22 01:11:30            5942 species  Wilson's Sn…
+#> # … with more rows, and 42 more variables: scientific_name <chr>,
+#> #   subspecies_common_name <chr>, subspecies_scientific_name <chr>,
+#> #   observation_count <chr>, breeding_code <chr>, breeding_category <chr>,
+#> #   behavior_code <chr>, age_sex <chr>, country <chr>, country_code <chr>,
+#> #   state <chr>, state_code <chr>, county <chr>, county_code <chr>,
+#> #   iba_code <chr>, bcr_code <dbl>, usfws_code <chr>, atlas_block <chr>,
+#> #   locality <chr>, locality_id <chr>, locality_type <chr>, latitude <dbl>, …
 ```
 
 Now, we can use `dplyr` to perform standard queries:
 
 ``` r
 colnames(df)
-#>  [1] "GLOBAL UNIQUE IDENTIFIER"   "LAST EDITED DATE"          
-#>  [3] "TAXONOMIC ORDER"            "CATEGORY"                  
-#>  [5] "COMMON NAME"                "SCIENTIFIC NAME"           
-#>  [7] "SUBSPECIES COMMON NAME"     "SUBSPECIES SCIENTIFIC NAME"
-#>  [9] "OBSERVATION COUNT"          "BREEDING CODE"             
-#> [11] "BREEDING CATEGORY"          "BEHAVIOR CODE"             
-#> [13] "AGE/SEX"                    "COUNTRY"                   
-#> [15] "COUNTRY CODE"               "STATE"                     
-#> [17] "STATE CODE"                 "COUNTY"                    
-#> [19] "COUNTY CODE"                "IBA CODE"                  
-#> [21] "BCR CODE"                   "USFWS CODE"                
-#> [23] "ATLAS BLOCK"                "LOCALITY"                  
-#> [25] "LOCALITY ID"                "LOCALITY TYPE"             
-#> [27] "LATITUDE"                   "LONGITUDE"                 
-#> [29] "OBSERVATION DATE"           "TIME OBSERVATIONS STARTED" 
-#> [31] "OBSERVER ID"                "SAMPLING EVENT IDENTIFIER" 
-#> [33] "PROTOCOL TYPE"              "PROTOCOL CODE"             
-#> [35] "PROJECT CODE"               "DURATION MINUTES"          
-#> [37] "EFFORT DISTANCE KM"         "EFFORT AREA HA"            
-#> [39] "NUMBER OBSERVERS"           "ALL SPECIES REPORTED"      
-#> [41] "GROUP IDENTIFIER"           "HAS MEDIA"                 
-#> [43] "APPROVED"                   "REVIEWED"                  
-#> [45] "REASON"                     "TRIP COMMENTS"             
-#> [47] "SPECIES COMMENTS"
+#>  [1] "global_unique_identifier"   "last_edited_date"          
+#>  [3] "taxonomic_order"            "category"                  
+#>  [5] "common_name"                "scientific_name"           
+#>  [7] "subspecies_common_name"     "subspecies_scientific_name"
+#>  [9] "observation_count"          "breeding_code"             
+#> [11] "breeding_category"          "behavior_code"             
+#> [13] "age_sex"                    "country"                   
+#> [15] "country_code"               "state"                     
+#> [17] "state_code"                 "county"                    
+#> [19] "county_code"                "iba_code"                  
+#> [21] "bcr_code"                   "usfws_code"                
+#> [23] "atlas_block"                "locality"                  
+#> [25] "locality_id"                "locality_type"             
+#> [27] "latitude"                   "longitude"                 
+#> [29] "observation_date"           "time_observations_started" 
+#> [31] "observer_id"                "sampling_event_identifier" 
+#> [33] "protocol_type"              "protocol_code"             
+#> [35] "project_code"               "duration_minutes"          
+#> [37] "effort_distance_km"         "effort_area_ha"            
+#> [39] "number_observers"           "all_species_reported"      
+#> [41] "group_identifier"           "has_media"                 
+#> [43] "approved"                   "reviewed"                  
+#> [45] "reason"                     "trip_comments"             
+#> [47] "species_comments"
 ```
 
 ``` r
-df %>% count(`SCIENTIFIC NAME`, sort=TRUE)
+df %>% count(scientific_name, sort=TRUE)
 #> # Source:     lazy query [?? x 2]
 #> # Database:   duckdb_connection
 #> # Ordered by: desc(n)
-#>    `SCIENTIFIC NAME`            n
+#>    scientific_name              n
 #>    <chr>                    <dbl>
 #>  1 Cardinalis cardinalis      125
 #>  2 Mimus polyglottos           86
@@ -149,9 +149,9 @@ df %>% count(`SCIENTIFIC NAME`, sort=TRUE)
 #>  4 Turdus migratorius          68
 #>  5 Sialia sialis               67
 #>  6 Zenaida asiatica            66
-#>  7 Thryothorus ludovicianus    64
-#>  8 Zenaida macroura            64
+#>  7 Zenaida macroura            64
+#>  8 Thryothorus ludovicianus    64
 #>  9 Spinus pinus                54
-#> 10 Spizella passerina          44
+#> 10 Cyanocitta cristata         44
 #> # … with more rows
 ```
