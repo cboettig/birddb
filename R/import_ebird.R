@@ -29,7 +29,7 @@ import_ebird <- function(tarfile){
   # clean up column names
   col_names <- names(ds)
   names(col_names) <- gsub("[/ ]", "_", tolower(col_names))
-  ds <- dplyr::select(ds, col_names)
+  ds <- dplyr::select(ds, dplyr::all_of(col_names))
   
   # Consider alternative partitions that might speed common queries
   # partitioning = c("COUNTRY")
@@ -46,18 +46,41 @@ arrow_open_ebird_txt <- function(ebd, dest){
   ds <- arrow::open_dataset(ebd, format="text", delim="\t")
   col_names <- names(ds)
   col_names <- col_names[col_names != ""] # drop empty column (in sample data)
-  col_types <- "stisssssssssssssssssisssssddtssssssiddiisiiisss"
-  x <- strsplit(col_types, "")[[1]]
-  expand_schema = list(s = arrow::string(), i = arrow::int64(), 
-                       d = arrow::float64(), t= arrow::timestamp(unit="us"),
-                       D = arrow::date64())
-  ebd_schema <- expand_schema[x]
+  col_types <- ebird_col_type(col_names)
+  expand_schema = list(string = arrow::string(), 
+                       binary = arrow::binary(),
+                       integer = arrow::int64(), 
+                       double = arrow::float64(),
+                       timestamp = arrow::timestamp(unit="us"),
+                       date = arrow::date64())
+  ebd_schema <- expand_schema[col_types]
   names(ebd_schema) <- col_names
   sch <- do.call(arrow::schema, ebd_schema)
   
   # Once we have the schema, streaming is easy!
   ds <- arrow::open_dataset(ebd, format="text", delim="\t", schema = sch)
   ds
+}
+
+ebird_col_type <- function(col_names) {
+  # types for columns that are not character
+  col_types <- c(`LAST EDITED DATE` = "timestamp", 
+                 `TAXONOMIC ORDER` = "integer", 
+                 `BCR CODE` = "integer", 
+                 `LATITUDE` = "double", `LONGITUDE` = "double", 
+                 `OBSERVATION DATE` = "timestamp",
+                 `DURATION MINUTES` = "integer", 
+                 `EFFORT DISTANCE KM` = "double", 
+                 `EFFORT AREA HA` = "double", 
+                 `NUMBER OBSERVERS` = "integer", 
+                 `ALL SPECIES REPORTED` = "integer", 
+                 `HAS MEDIA` = "integer", 
+                 `APPROVED` = "integer", 
+                 `REVIEWED` = "integer")
+  # assume anything else is character
+  col_types <- col_types[col_names]
+  col_types[is.na(col_types)] <- "string"
+  setNames(col_types, col_names)
 }
 
 # Download URLs, eg https://download.ebird.org/ebd/prepackaged/ebd_relJul-2021.tar
