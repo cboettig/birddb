@@ -13,16 +13,15 @@
 #' tar <- ebird_sample_data()
 #' import_ebird(tar)
 #' 
-import_ebird <- function(tarfile){
+import_ebird <- function(tarfile) {
   
   source_dir <- tempfile("ebird_tmp")
   dest <- file.path(ebird_data_dir(), "parquet")
   
   dir.create(source_dir, recursive = TRUE)
   utils::untar(tarfile = tarfile, exdir = source_dir)
-  ebd <-list.files(source_dir, pattern="ebd.*\\.txt\\.gz", 
+  ebd <- list.files(source_dir, pattern = "ebd.*\\.txt\\.gz",
                    full.names = TRUE, recursive = TRUE)
-  
   
   ds <- arrow_open_ebird_txt(ebd, dest)
   
@@ -35,15 +34,16 @@ import_ebird <- function(tarfile){
   # partitioning = c("COUNTRY")
   # However, arrow supports at most 1024 partitions
   
-  arrow::write_dataset(ds, dest, format="parquet")
+  arrow::write_dataset(ds, dest, format = "parquet")
   
+  unlink(source_dir, recursive = TRUE)
   invisible(dest)
 }
 
 
-arrow_open_ebird_txt <- function(ebd, dest){
+arrow_open_ebird_txt <- function(ebd, dest) {
   ## a bit of ugliness in determining the schema arrow wants, can probably be improved now
-  ds <- arrow::open_dataset(ebd, format="text", delim="\t")
+  ds <- arrow::open_dataset(ebd, format = "text", delim = "\t")
   col_names <- names(ds)
   col_names <- col_names[col_names != ""] # drop empty column (in sample data)
   col_types <- ebird_col_type(col_names)
@@ -51,14 +51,14 @@ arrow_open_ebird_txt <- function(ebd, dest){
                        binary = arrow::binary(),
                        integer = arrow::int64(), 
                        double = arrow::float64(),
-                       timestamp = arrow::timestamp(unit="us"),
+                       timestamp = arrow::timestamp(unit = "us"),
                        date = arrow::date64())
   ebd_schema <- expand_schema[col_types]
   names(ebd_schema) <- col_names
   sch <- do.call(arrow::schema, ebd_schema)
   
   # Once we have the schema, streaming is easy!
-  ds <- arrow::open_dataset(ebd, format="text", delim="\t", schema = sch)
+  ds <- arrow::open_dataset(ebd, format = "text", delim = "\t", schema = sch)
   ds
 }
 
