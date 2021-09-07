@@ -84,7 +84,7 @@ colnames(df)
 ```
 
 ```{r}
-df %>% count(`SCIENTIFIC NAME`, sort=TRUE)
+df %>% count(scientific_name, sort=TRUE)
 ```
 
 
