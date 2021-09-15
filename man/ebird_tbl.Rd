@@ -4,7 +4,7 @@
 \alias{ebird_tbl}
 \alias{observations}
 \alias{checklists}
-\title{Return a remote \code{tbl_dbi} connection to your local eBird database}
+\title{Return a remote connection to a table in your local eBird database}
 \usage{
 observations(conn = ebird_conn("observations"))
 
@@ -40,9 +40,9 @@ Sys.setenv("BIRDDB_HOME" = temp_dir)
 tar <- sample_observation_data()
 # import the sample dataset to parquet
 import_ebird(tar)
-# set up the database connection
-observations <- observations()
 
+# set up the database connection to the observations data
+observations <- observations()
 # query the data, number of observations of each species
 dplyr::count(observations, common_name)
 

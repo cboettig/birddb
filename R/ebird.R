@@ -1,4 +1,4 @@
-#' Return a remote `tbl_dbi` connection to your local eBird database
+#' Return a remote connection to a table in your local eBird database
 #'
 #' Parquet files setup with a view in a DuckDB database, as done by
 #' [ebird_conn()], can be queried with [dplyr] syntax. This function sets up
