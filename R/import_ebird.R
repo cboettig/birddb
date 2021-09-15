@@ -52,7 +52,13 @@ import_ebird <- function(tarfile) {
     }
   }
   
+  # stream to parquet
   arrow::write_dataset(ds, dest, format = "parquet")
+  
+  # save metadata
+  f_metadata <- file.path(ebird_data_dir(),
+                          paste0(file_metadata[["type"]], "-metadata.csv"))
+  write.csv(file_metadata, file = f_metadata, row.names = FALSE)
   
   unlink(source_dir, recursive = TRUE)
   invisible(dest)
