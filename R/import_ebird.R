@@ -12,11 +12,16 @@
 #' 
 #' @export
 #' @examples
-#' # only use a tempdir for this example, don't copy this line for real data
-#' Sys.setenv("BIRDDB_HOME" = tempdir())
+#' # only use a tempdir for this example, don't copy this for real data
+#' temp_dir <- file.path(tempdir(), "birddb")
+#' Sys.setenv("BIRDDB_HOME" = temp_dir)
+#' 
 #' # get the path to a sample dataset provided with the package
 #' tar <- ebird_sample_data()
+#' # import the sample dataset to parquet
 #' import_ebird(tar)
+#' 
+#' unlink(temp_dir, recursive = TRUE)
 import_ebird <- function(tarfile) {
   file_metadata <- parse_ebd_filename(tarfile)
   dest <- file.path(ebird_data_dir(), file_metadata[["type"]])
@@ -122,13 +127,13 @@ parse_ebd_filename <- function(tarfile) {
          "extension should be .tar.")
   }
   if (grepl("ebd_sampling_rel[A-Z]{1}[a-z]{2}-[0-9]{4}\\.tar$", f)) {
-    data_type <- "checklist"
+    data_type <- "checklists"
     subset <- NA_character_
   } else if (grepl("ebd_rel[A-Z]{1}[a-z]{2}-[0-9]{4}\\.tar$", f)) {
-    data_type <- "observation"
+    data_type <- "observations"
     subset <- NA_character_
   } else if (grepl("ebd_[-_A-Za-z0-9]+_rel[A-Z]{1}[a-z]{2}-[0-9]{4}\\.tar$", f)) {
-    data_type <- "observation"
+    data_type <- "observations"
     subset <- sub("ebd_([-_A-Za-z0-9]+)_rel[A-Z]{1}[a-z]{2}-[0-9]{4}\\.tar", 
                   "\\1", f)
   } else {
