@@ -121,12 +121,10 @@ parse_ebd_filename <- function(tarfile) {
   } else if (grepl("ebd_rel[A-Z]{1}[a-z]{2}-[0-9]{4}\\.tar$", f)) {
     data_type <- "observation"
     subset <- NA_character_
-    message("Importing observation data from: ", f)
   } else if (grepl("ebd_[-_A-Za-z0-9]+_rel[A-Z]{1}[a-z]{2}-[0-9]{4}\\.tar$", f)) {
     data_type <- "observation"
     subset <- sub("ebd_([-_A-Za-z0-9]+)_rel[A-Z]{1}[a-z]{2}-[0-9]{4}\\.tar", 
                   "\\1", f)
-    message("Importing subsetted observation data from: ", f)
   } else {
     stop("The provided tar filename does not appear to contain eBird data. ", 
          "The expected format is, e.g., ebd_relJul-2021.tar.")
@@ -150,5 +148,14 @@ parse_ebd_filename <- function(tarfile) {
   if (!is.na(subset)) {
     message("EBD subset detected for: ", subset)
   }
-  return(data.frame(type = data_type, subset = subset, version = version))
+  
+  # sha256 file hash
+  hash <- openssl::sha256(file(tarfile))
+  return(data.frame(type = data_type, 
+                    version = version,
+                    subset = subset, 
+                    source_file = tarfile,
+                    file_size = file.size(tarfile),
+                    hash_sha256 = as.character(hash)[],
+                    timestamp = Sys.time()))
 }

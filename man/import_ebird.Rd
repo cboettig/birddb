@@ -2,21 +2,26 @@
 % Please edit documentation in R/import_ebird.R
 \name{import_ebird}
 \alias{import_ebird}
-\title{import ebird}
+\title{Import eBird data to parquet}
 \usage{
 import_ebird(tarfile)
 }
 \arguments{
-\item{tarfile}{path to the copy of \verb{ebd_rel<DATE>.tar} file you downloaded}
+\item{tarfile}{path to the tar archive file downloaded from the eBird
+website. Files containing either observation data (e.g.
+\verb{ebd_rel<DATE>.tar}) or checklist (e.g. \verb{ebd_sampling_rel<DATE>.tar}) data
+can be provided}
 }
 \description{
-Given a path to the ebird tarfile, this function will extract and import the
-tar archive into a parquet-based database in your \code{\link[=ebird_data_dir]{ebird_data_dir()}}
+eBird data are released as tab-separated text files, packaged into tar
+archives. Given a path to an eBird tarfile, this function will extract and
+import the tar archive into a parquet-based database in your
+\code{\link[=ebird_data_dir]{ebird_data_dir()}}.
 }
 \examples{
-
-Sys.setenv("BIRDDB_HOME"=tempdir())
+# only use a tempdir for this example, don't copy this line for real data
+Sys.setenv("BIRDDB_HOME" = tempdir())
+# get the path to a sample dataset provided with the package
 tar <- ebird_sample_data()
 import_ebird(tar)
-
 }
