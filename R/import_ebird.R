@@ -3,13 +3,45 @@
 #' eBird data are released as tab-separated text files, packaged into tar
 #' archives. Given a path to an eBird tarfile, this function will extract and
 #' import the tar archive into a parquet-based database in your
-#' [`ebird_data_dir()`].
+#' [ebird_data_dir()].
 #' 
 #' @param tarfile path to the tar archive file downloaded from the eBird
 #'   website. Files containing either observation data (e.g.
 #'   `ebd_rel<DATE>.tar`) or checklist (e.g. `ebd_sampling_rel<DATE>.tar`) data
 #'   can be provided
+#'   
+#' @details 
+#' [eBird](https://ebird.org/home) data are collected and organized around the
+#' concept of a checklist, representing observations from a single birding
+#' event. Each checklist contains a list of species observed, counts of the
+#' number of individuals seen of each species, the location and time of the
+#' observations, and a measure of the effort expended while collecting these
+#' data. The majority of the [eBird](https://ebird.org/home) database is
+#' available for download in the form of the [eBird Basic Dataset
+#' (EBD)](https://ebird.org/data/download), a set of two tab-separated text
+#' files. 
 #' 
+#' The **checklist** dataset (referred to as the Sampling Event Data on the
+#' eBird website) consists of one row for each eBird checklist and columns
+#' contain checklist-level information such as location, date, and search
+#' effort. The **observation** dataset consists of one row for each species
+#' observed on each checklist and columns contain checklist-level information
+#' such as number of individuals detected. This dataset also contains all
+#' checklist-level variables, duplicated for each species on the same checklist.
+#'
+#' After [submitting a request for data
+#' access](https://ebird.org/data/download), users can download either or both
+#' of these datasets as tar archive files. `import_ebird()` takes the path to a
+#' tar file as input and imports the text file contained within to a parquet
+#' file, which will allow much easier access to the data. This function will
+#' automatically detect whether you are importing a checklist or observation
+#' dataset provided you **do not change the name of the downloaded file or
+#' unarchive the tar file**. The parquet files will be stored in the directory
+#' specified by [ebird_data_dir()], consult the help for that function to learn
+#' how to modify the parquet directory.
+#' 
+#' @return Invisibly return the path to the directory containing eBird parquet
+#'   files.
 #' @export
 #' @examples
 #' # only use a tempdir for this example, don't copy this for real data
@@ -17,14 +49,14 @@
 #' Sys.setenv("BIRDDB_HOME" = temp_dir)
 #' 
 #' # get the path to a sample dataset provided with the package
-#' tar <- ebird_sample_data()
+#' tar <- sample_observation_data()
 #' # import the sample dataset to parquet
 #' import_ebird(tar)
 #' 
 #' unlink(temp_dir, recursive = TRUE)
 import_ebird <- function(tarfile) {
   file_metadata <- parse_ebd_filename(tarfile)
-  dest <- file.path(ebird_data_dir(), file_metadata[["type"]])
+  dest <- file.path(ebird_data_dir(), file_metadata[["dataset"]])
   
   # extract the tarfile to a temp directory
   source_dir <- tempfile("ebird_tmp")
@@ -42,7 +74,7 @@ import_ebird <- function(tarfile) {
   # confirm overwrite
   if (dir.exists(dest)) {
     if (interactive()) {
-      msg <- paste("eBird", file_metadata[["type"]], 
+      msg <- paste("eBird", file_metadata[["dataset"]], 
                    "data already exists in BIRDDB_HOME,",
                    "would you like to overwrite this data?")
       overwrite <- utils::askYesNo(msg, default = NA)
@@ -52,7 +84,9 @@ import_ebird <- function(tarfile) {
         stop("Cancelling data import to avoid overwriting existing data.")
       }
     } else {
-      message("Overwriting existing eBird ", file_metadata[["type"]], " data.")
+      message("Overwriting existing eBird ", 
+              file_metadata[["dataset"]], 
+              " data.")
       unlink(dest, recursive = TRUE)
     }
   }
@@ -62,7 +96,7 @@ import_ebird <- function(tarfile) {
   
   # save metadata
   f_metadata <- file.path(ebird_data_dir(),
-                          paste0(file_metadata[["type"]], "-metadata.csv"))
+                          paste0(file_metadata[["dataset"]], "-metadata.csv"))
   write.csv(file_metadata, file = f_metadata, row.names = FALSE)
   
   unlink(source_dir, recursive = TRUE)
@@ -100,7 +134,6 @@ ebird_col_type <- function(col_names) {
   # types for columns that are not character
   col_types <- c(`LAST EDITED DATE` = "timestamp", 
                  `TAXONOMIC ORDER` = "integer", 
-                 `BCR CODE` = "integer", 
                  `LATITUDE` = "double", `LONGITUDE` = "double", 
                  `OBSERVATION DATE` = "timestamp",
                  `DURATION MINUTES` = "integer", 
@@ -127,13 +160,13 @@ parse_ebd_filename <- function(tarfile) {
          "extension should be .tar.")
   }
   if (grepl("ebd_sampling_rel[A-Z]{1}[a-z]{2}-[0-9]{4}\\.tar$", f)) {
-    data_type <- "checklists"
+    dataset <- "checklists"
     subset <- NA_character_
   } else if (grepl("ebd_rel[A-Z]{1}[a-z]{2}-[0-9]{4}\\.tar$", f)) {
-    data_type <- "observations"
+    dataset <- "observations"
     subset <- NA_character_
   } else if (grepl("ebd_[-_A-Za-z0-9]+_rel[A-Z]{1}[a-z]{2}-[0-9]{4}\\.tar$", f)) {
-    data_type <- "observations"
+    dataset <- "observations"
     subset <- sub("ebd_([-_A-Za-z0-9]+)_rel[A-Z]{1}[a-z]{2}-[0-9]{4}\\.tar", 
                   "\\1", f)
   } else {
@@ -154,7 +187,7 @@ parse_ebd_filename <- function(tarfile) {
   version = format(date, "%Y-%m")
 
   msg <- sprintf("Importing %s data from the %s eBird Basic Dataset: %s",
-                 data_type, version, f)
+                 dataset, version, f)
   message(msg)
   if (!is.na(subset)) {
     message("EBD subset detected for: ", subset)
@@ -162,7 +195,7 @@ parse_ebd_filename <- function(tarfile) {
   
   # sha256 file hash
   hash <- openssl::sha256(file(tarfile))
-  return(data.frame(type = data_type, 
+  return(data.frame(dataset = dataset, 
                     version = version,
                     subset = subset, 
                     source_file = tarfile,

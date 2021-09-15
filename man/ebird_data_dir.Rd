@@ -2,17 +2,19 @@
 % Please edit documentation in R/ebird_data_dir.R
 \name{ebird_data_dir}
 \alias{ebird_data_dir}
-\title{ebird data dir}
+\title{Retrieve directory used to store eBird data parquet files}
 \usage{
 ebird_data_dir()
 }
 \description{
-Show the location ebird uses to store data. The default location is that
-chosen by R based on your OS, see \verb{[tools::R_user_dir]}.
-Alternately, users can configure a different permanent storage location by
-setting their desired path in the environmental variable BIRDDB_HOME.
-This may be desirable when multiple users of the same machine or server want
-to access a single copy of the ebird data.
+Show the location used by \code{birddb} to store eBird data parquet files. The
+default location is that chosen by R based on your OS, see
+\code{\link[tools:userdir]{tools::R_user_dir()}}. Alternately, users can configure a different permanent
+storage location by setting their desired path in the environmental variable
+\code{BIRDDB_HOME}. This may be desirable when multiple users of the same machine
+or server want to access a single copy of the eBird data. To set
+\code{BIRDDB_HOME}, add it to your \code{.Renviron} file, for example by using
+\code{usethis::edit_r_environ()}.
 }
 \examples{
 ebird_data_dir()
