@@ -46,7 +46,7 @@ ebird_parquet_files <- function() {
 #' @examples
 #' ebird_sample_data()
 ebird_sample_data <- function(){
-  system.file("extdata", "ebd_sample.tar",
-              package="birddb", mustWork = TRUE)
+  system.file("extdata", "ebd_relJul-2021.tar", package = "birddb", 
+              mustWork = TRUE)
 }
 
