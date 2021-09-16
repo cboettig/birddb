@@ -135,7 +135,7 @@ ebird_col_type <- function(col_names) {
   col_types <- c(`LAST EDITED DATE` = "timestamp", 
                  `TAXONOMIC ORDER` = "integer", 
                  `LATITUDE` = "double", `LONGITUDE` = "double", 
-                 `OBSERVATION DATE` = "timestamp",
+                 `OBSERVATION DATE` = "date",
                  `DURATION MINUTES` = "integer", 
                  `EFFORT DISTANCE KM` = "double", 
                  `EFFORT AREA HA` = "double", 
