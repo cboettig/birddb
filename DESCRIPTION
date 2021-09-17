@@ -19,7 +19,8 @@ Imports:
     DBI,
     dplyr,
     dbplyr,
-    openssl
+    openssl,
+    utils
 Suggests:
     spelling,
     testthat (>= 3.0.0),

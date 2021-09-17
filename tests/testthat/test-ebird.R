@@ -12,7 +12,7 @@ test_that("birddb works", {
   expect_s3_class(observations, "tbl")
   expect_s3_class(observations, "tbl_dbi")
   
-  out <- observations %>% count(common_name) %>% collect()
+  out <- observations %>% dplyr::count(common_name) %>% dplyr::collect()
   expect_s3_class(out, "data.frame")
   expect_gt(nrow(out), 0)
   
@@ -22,7 +22,7 @@ test_that("birddb works", {
   expect_s3_class(checklists, "tbl")
   expect_s3_class(checklists, "tbl_dbi")
   
-  out <- checklists %>% count(country) %>% collect()
+  out <- checklists %>% dplyr::count(country) %>% dplyr::collect()
   expect_s3_class(out, "data.frame")
   expect_gt(nrow(out), 0)
   

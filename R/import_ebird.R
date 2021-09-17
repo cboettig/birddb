@@ -55,7 +55,7 @@
 #' 
 #' unlink(temp_dir, recursive = TRUE)
 import_ebird <- function(tarfile) {
-  file_metadata <- parse_ebd_filename(tarfile)
+  file_metadata <- extract_metadata(tarfile)
   dest <- file.path(ebird_data_dir(), file_metadata[["dataset"]])
   
   # extract the tarfile to a temp directory
@@ -78,10 +78,9 @@ import_ebird <- function(tarfile) {
                    "data already exists in BIRDDB_HOME,",
                    "would you like to overwrite this data?")
       overwrite <- utils::askYesNo(msg, default = NA)
-      if (isTRUE(overwrite)) {
-        unlink(dest, recursive = TRUE)
-      } else {
-        stop("Cancelling data import to avoid overwriting existing data.")
+      if (!isTRUE(overwrite)) {
+        warning("Cancelling data import to avoid overwriting existing data.")
+        return(invisible())
       }
     } else {
       message("Overwriting existing eBird ", 
@@ -97,7 +96,7 @@ import_ebird <- function(tarfile) {
   # save metadata
   f_metadata <- file.path(ebird_data_dir(),
                           paste0(file_metadata[["dataset"]], "-metadata.csv"))
-  write.csv(file_metadata, file = f_metadata, row.names = FALSE)
+  utils::write.csv(file_metadata, file = f_metadata, row.names = FALSE)
   
   unlink(source_dir, recursive = TRUE)
   invisible(dest)
@@ -147,10 +146,11 @@ ebird_col_type <- function(col_names) {
   # assume anything else is character
   col_types <- col_types[col_names]
   col_types[is.na(col_types)] <- "string"
-  setNames(col_types, col_names)
+  names(col_types) <- col_names
+  return(col_types)
 }
 
-parse_ebd_filename <- function(tarfile) {
+extract_metadata <- function(tarfile) {
   stopifnot(is.character(tarfile), length(tarfile) == 1, file.exists(tarfile))
   
   f <- basename(tarfile)
