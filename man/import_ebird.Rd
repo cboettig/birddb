@@ -2,21 +2,63 @@
 % Please edit documentation in R/import_ebird.R
 \name{import_ebird}
 \alias{import_ebird}
-\title{import ebird}
+\title{Import eBird data to parquet}
 \usage{
 import_ebird(tarfile)
 }
 \arguments{
-\item{tarfile}{path to the copy of \verb{ebd_rel<DATE>.tar} file you downloaded}
+\item{tarfile}{path to the tar archive file downloaded from the eBird
+website. Files containing either observation data (e.g.
+\verb{ebd_rel<DATE>.tar}) or checklist (e.g. \verb{ebd_sampling_rel<DATE>.tar}) data
+can be provided}
+}
+\value{
+Invisibly return the path to the directory containing eBird parquet
+files.
 }
 \description{
-Given a path to the ebird tarfile, this function will extract and import the
-tar archive into a parquet-based database in your \code{\link[=ebird_data_dir]{ebird_data_dir()}}
+eBird data are released as tab-separated text files, packaged into tar
+archives. Given a path to an eBird tarfile, this function will extract and
+import the tar archive into a parquet-based database in your
+\code{\link[=ebird_data_dir]{ebird_data_dir()}}.
+}
+\details{
+\href{https://ebird.org/home}{eBird} data are collected and organized around the
+concept of a checklist, representing observations from a single birding
+event. Each checklist contains a list of species observed, counts of the
+number of individuals seen of each species, the location and time of the
+observations, and a measure of the effort expended while collecting these
+data. The majority of the \href{https://ebird.org/home}{eBird} database is
+available for download in the form of the \href{https://ebird.org/data/download}{eBird Basic Dataset (EBD)}, a set of two tab-separated text
+files.
+
+The \strong{checklist} dataset (referred to as the Sampling Event Data on the
+eBird website) consists of one row for each eBird checklist and columns
+contain checklist-level information such as location, date, and search
+effort. The \strong{observation} dataset consists of one row for each species
+observed on each checklist and columns contain checklist-level information
+such as number of individuals detected. This dataset also contains all
+checklist-level variables, duplicated for each species on the same checklist.
+
+After \href{https://ebird.org/data/download}{submitting a request for data access}, users can download either or both
+of these datasets as tar archive files. \code{import_ebird()} takes the path to a
+tar file as input and imports the text file contained within to a parquet
+file, which will allow much easier access to the data. This function will
+automatically detect whether you are importing a checklist or observation
+dataset provided you \strong{do not change the name of the downloaded file or
+unarchive the tar file}. The parquet files will be stored in the directory
+specified by \code{\link[=ebird_data_dir]{ebird_data_dir()}}, consult the help for that function to learn
+how to modify the parquet directory.
 }
 \examples{
+# only use a tempdir for this example, don't copy this for real data
+temp_dir <- file.path(tempdir(), "birddb")
+Sys.setenv("BIRDDB_HOME" = temp_dir)
 
-Sys.setenv("BIRDDB_HOME"=tempdir())
-tar <- ebird_sample_data()
+# get the path to a sample dataset provided with the package
+tar <- sample_observation_data()
+# import the sample dataset to parquet
 import_ebird(tar)
 
+unlink(temp_dir, recursive = TRUE)
 }

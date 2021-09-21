@@ -2,19 +2,40 @@
 % Please edit documentation in R/ebird_conn.R
 \name{ebird_conn}
 \alias{ebird_conn}
-\title{A \verb{[DBI]}-style database connection to the imported eBird data}
+\title{Set up a \code{DBI}-style database connection to the imported eBird data}
 \usage{
-ebird_conn()
+ebird_conn(dataset = c("observations", "checklists"), memory_limit = 4)
+}
+\arguments{
+\item{dataset}{the type of dataset to set up a connection to, either the
+observations of checklists.}
+
+\item{memory_limit}{the memory limit for DuckDB.}
+}
+\value{
+A \link{DBI} connection object using to communicate with the DuckDB
+database containing the eBird data.
 }
 \description{
-Returns a database connection to the local eBird dataset.
+Parquet files can be accessed as though they were relational database tables
+by setting up a view to the file using DuckDB. This function sets up a view
+on either the checklist or observation dataset and returns a \link{DBI}-style
+database connection to the data. The returned object can then be queried
+with SQL syntax via \link{DBI} or with \link{dplyr} syntax via \link{dbplyr}. For the latter
+approach, consider using the \code{\link[=checklists]{checklists()}} and \code{\link[=observations]{observations()}} functions
+which will return \link{tbl} objects ready for access using \link{dplyr} syntax.
 }
 \examples{
-# tempdir settings are just for testing! Don't copy this.
-Sys.setenv("BIRDDB_HOME"=tempdir())
+# only use a tempdir for this example, don't copy this for real data
+temp_dir <- file.path(tempdir(), "birddb")
+Sys.setenv("BIRDDB_HOME" = temp_dir)
 
-tar <- ebird_sample_data()
+# get the path to a sample dataset provided with the package
+tar <- sample_observation_data()
+# import the sample dataset to parquet
 import_ebird(tar)
-con <- ebird_conn()
+# set up the database connection
+con <- ebird_conn(dataset = "observations")
 
+unlink(temp_dir, recursive = TRUE)
 }

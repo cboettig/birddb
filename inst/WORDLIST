@@ -2,9 +2,12 @@ CMD
 Codecov
 dir
 dplyr
+dbplyr
 duckdb
+DuckDB
 eBird
 ebd
 ebird
 http
 tarfile
+unarchive

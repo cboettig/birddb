@@ -1,26 +1,49 @@
-
-#' Return a remote data.frame connection to your local ebird database
+#' Return a remote connection to a table in your local eBird database
+#'
+#' Parquet files setup with a view in a DuckDB database, as done by
+#' [ebird_conn()], can be queried with [dplyr] syntax. This function sets up
+#' [tbl_dbi] object, which are remote tables referencing either the checklist or
+#' observation dataset. These remote tables can then by queried with [dplyr]
+#' similarly to a [data.frame].
 #' 
-#' @param conn a connection to the local ebird database, see `[ebird_conn]`.
-#' @export
+#' @param conn a connection to the local eBird database, see [ebird_conn()].
+#' 
+#' @details 
+#' When working with a remote table in [dplyr], the primary different compared
+#' to working with a normal [data.frame] is that calls are evaluated lazily,
+#' generating SQL that is only sent to the database when you request the data. 
+#' The [dplyr] functions [collect()] and [compute()] can be used to force 
+#' evaluation.
+#' 
+#' @return A [tbl_dbi] object referencing either the checklist or observation 
+#'   data in DuckDB.
+#' @name ebird_tbl
 #' @examples
+#' # only use a tempdir for this example, don't copy this for real data
+#' temp_dir <- file.path(tempdir(), "birddb")
+#' Sys.setenv("BIRDDB_HOME" = temp_dir)
 #' 
-#' # tempdir settings are just for testing! Don't copy this.
-#' Sys.setenv("BIRDDB_HOME"=tempdir())
-#' 
-#' 
-#' tar <- ebird_sample_data()
+#' # get the path to a sample dataset provided with the package
+#' tar <- sample_observation_data()
+#' # import the sample dataset to parquet
 #' import_ebird(tar)
-#' df <- ebird()
 #' 
-ebird <- function(conn = ebird_conn()) {
-  assert_ebird_imported()
-  dplyr::tbl(conn, "ebd")
+#' # set up the database connection to the observations data
+#' observations <- observations()
+#' # query the data, number of observations of each species
+#' dplyr::count(observations, common_name)
+#' 
+#' unlink(temp_dir, recursive = TRUE)
+NULL
+
+#' @rdname ebird_tbl
+#' @export
+observations <- function(conn = ebird_conn("observations")) {
+  dplyr::tbl(conn, "observations")
 }
 
-
-
-assert_ebird_imported <- function(){
-  parquet_data <- file.path(ebird_data_dir(), "parquet")
-  stopifnot(file.exists(parquet_data))
+#' @rdname ebird_tbl
+#' @export
+checklists <- function(conn = ebird_conn("checklists")) {
+  dplyr::tbl(conn, "checklists")
 }

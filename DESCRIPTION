@@ -18,7 +18,9 @@ Imports:
     duckdb (>= 0.2.9),
     DBI,
     dplyr,
-    dbplyr
+    dbplyr,
+    openssl,
+    utils
 Suggests:
     spelling,
     testthat (>= 3.0.0),
