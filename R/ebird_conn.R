@@ -9,7 +9,9 @@
 #' which will return [tbl] objects ready for access using [dplyr] syntax.
 #' 
 #' @param dataset the type of dataset to set up a connection to, either the 
-#'   observations of checklists.
+#' observations of checklists.
+#' @param cache_connection should we preserve a cache of the connection? allows
+#'   faster load times and prevents connection from being garbage-collected.
 #' @param memory_limit the memory limit for DuckDB.
 #' 
 #' @return A [DBI] connection object using to communicate with the DuckDB 
@@ -29,25 +31,48 @@
 #' 
 #' unlink(temp_dir, recursive = TRUE)
 ebird_conn <- function(dataset = c("observations", "checklists"), 
+                       cache_connection = TRUE,
                        memory_limit = 4) {
   dataset <- match.arg(dataset)
+  stopifnot(is.logical(cache_connection), length(cache_connection) == 1)
   stopifnot(is.numeric(memory_limit), length(memory_limit) == 1,
             !is.na(memory_limit), memory_limit > 0)
   parquet <- ebird_parquet_files(dataset = dataset)
   
-  ## Is it worth persisting the duckdb connection on disk to avoid
-  ## recreating the View? (~ 9m operation)
+  # query to create view in duckdb to the parquet file
+  view_query <- paste0("CREATE VIEW '", dataset, 
+                       "' AS SELECT * FROM parquet_scan('",
+                       parquet, "');")
+  
+  # check for a cached connection
+  conn <- mget("birddb", envir = birddb_cache, ifnotfound = NA)[["birddb"]]
+  if (inherits(conn, "DBIConnection")) {
+    if (DBI::dbIsValid(conn)) {
+      # if view not already in databse, create it
+      if (!dataset %in% DBI::dbListTables(conn)) {
+        DBI::dbSendQuery(conn, view_query)
+      }
+      return(conn)
+    } else {
+      # shut down invalid cached connection to allow re-connection
+      DBI::dbDisconnect(conn, shutdown = TRUE)
+    }
+  }
+  
+  # TODO: consider persisting connection on disk to avoid recreating view
   conn <- DBI::dbConnect(drv = duckdb::duckdb(), ebird_db_dir())
   
+  # set memory limit
+  # TODO: temp approach for testing, improve approach in production
   DBI::dbExecute(conn = conn, 
                  paste0("PRAGMA memory_limit='", memory_limit, "GB'"))
   
-  # create a "View" in duckdb to the parquet file
-  if (!dataset %in% DBI::dbListTables(conn)) {
-    query <- paste0("CREATE VIEW '", dataset,
-                    "' AS SELECT * FROM parquet_scan('",
-                    parquet, "');")
-    DBI::dbSendQuery(conn, query)
+  # create view to parquet file
+  DBI::dbSendQuery(conn, view_query)
+  
+  # cache the connection
+  if (cache_connection) {
+    assign("birddb", conn, envir = birddb_cache)
   }
   return(conn)
 }
@@ -71,13 +96,20 @@ ebird_parquet_files <- function(dataset = c("observations", "checklists")) {
   return(file)
 }
 
-# ebird_conn_arrow <- function() {
-#   con <- DBI::dbConnect(duckdb::duckdb())
-#   dir <- file.path(ebird_data_dir(), "parquet")
-# 
-#   # ds <- arrow_open_ebird_txt("/minio/shared-data/ebd_relJul-2021.txt.gz", dir)
-#   ds <- arrow::open_dataset(dir)
-#   ## OOM & crashes
-#   duckdb::duckdb_register_arrow(con, "ebd", ds)
-#   con
-# }
+# environment to store the cached copy of the connection
+birddb_cache <- new.env()
+
+# finalizer to close the connection on exit.
+local_db_disconnect <- function(db = ebird_conn()){
+  if (inherits(db, "DBIConnection")) {
+    suppressWarnings({
+      DBI::dbDisconnect(db, shutdown = TRUE)
+    })
+  }
+  if (exists("birddb", envir = birddb_cache)) {
+    suppressWarnings({
+      rm("birddb", envir = birddb_cache)
+    })
+  }
+}
+reg.finalizer(birddb_cache, local_db_disconnect, onexit = TRUE)

@@ -4,11 +4,18 @@
 \alias{ebird_conn}
 \title{Set up a \code{DBI}-style database connection to the imported eBird data}
 \usage{
-ebird_conn(dataset = c("observations", "checklists"), memory_limit = 4)
+ebird_conn(
+  dataset = c("observations", "checklists"),
+  cache_connection = TRUE,
+  memory_limit = 4
+)
 }
 \arguments{
 \item{dataset}{the type of dataset to set up a connection to, either the
 observations of checklists.}
+
+\item{cache_connection}{should we preserve a cache of the connection? allows
+faster load times and prevents connection from being garbage-collected.}
 
 \item{memory_limit}{the memory limit for DuckDB.}
 }
