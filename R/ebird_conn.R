@@ -46,7 +46,7 @@ ebird_conn <- function(dataset = c("observations", "checklists"),
   
   # check for a cached connection
   conn <- mget("birddb", envir = birddb_cache, ifnotfound = NA)[["birddb"]]
-  if (inherits(conn, "DBIConnection") ) {
+  if (inherits(conn, "DBIConnection")) {
     if (DBI::dbIsValid(conn)) {
       # if view not already in databse, create it
       if (!dataset %in% DBI::dbListTables(conn)) {
