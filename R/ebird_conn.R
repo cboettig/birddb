@@ -33,10 +33,13 @@
 ebird_conn <- function(dataset = c("observations", "checklists"), 
                        cache_connection = TRUE,
                        memory_limit = 4) {
+  
   dataset <- match.arg(dataset)
+  
   stopifnot(is.logical(cache_connection), length(cache_connection) == 1)
   stopifnot(is.numeric(memory_limit), length(memory_limit) == 1,
             !is.na(memory_limit), memory_limit > 0)
+  
   parquet <- ebird_parquet_files(dataset = dataset)
   
   # query to create view in duckdb to the parquet file
@@ -46,35 +49,38 @@ ebird_conn <- function(dataset = c("observations", "checklists"),
   
   # check for a cached connection
   conn <- mget("birddb", envir = birddb_cache, ifnotfound = NA)[["birddb"]]
-  if (inherits(conn, "DBIConnection")) {
-    if (DBI::dbIsValid(conn)) {
-      # if view not already in databse, create it
-      if (!dataset %in% DBI::dbListTables(conn)) {
-        DBI::dbSendQuery(conn, view_query)
-      }
-      return(conn)
-    } else {
-      # shut down invalid cached connection to allow re-connection
-      DBI::dbDisconnect(conn, shutdown = TRUE)
-    }
+  
+  # Disconnect if it's an invalid connection (expired in cache)
+  if ( db_is_invalid(conn) )  
+    conn <- DBI::dbDisconnect(conn, shutdown = TRUE)
+  
+  # We don't have a valid cached connection, so we must create one! 
+  if (!inherits(conn, "DBIConnection")){
+    conn <- DBI::dbConnect(drv = duckdb::duckdb(), ebird_db_dir())  
   }
   
-  # TODO: consider persisting connection on disk to avoid recreating view
-  conn <- DBI::dbConnect(drv = duckdb::duckdb(), ebird_db_dir())
-  
-  # set memory limit
+  # enforce memory limit
   # TODO: temp approach for testing, improve approach in production
   DBI::dbExecute(conn = conn, 
                  paste0("PRAGMA memory_limit='", memory_limit, "GB'"))
+
+  # create the view if does not exist
+  if (!dataset %in% DBI::dbListTables(conn)){
+    DBI::dbSendQuery(conn, view_query)
+  }
   
-  # create view to parquet file
-  DBI::dbSendQuery(conn, view_query)
-  
-  # cache the connection
+  # (re)-cache the connection
   if (cache_connection) {
     assign("birddb", conn, envir = birddb_cache)
   }
-  return(conn)
+  
+  conn
+}
+
+## 
+db_is_invalid <- function(conn) {
+  if (!inherits(conn, "DBIConnection")) return(FALSE)
+  !DBI::dbIsValid(conn)
 }
 
 ebird_parquet_files <- function(dataset = c("observations", "checklists")) {
