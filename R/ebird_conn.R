@@ -42,17 +42,13 @@ ebird_conn <- function(dataset = c("observations", "checklists"),
   
   parquet <- ebird_parquet_files(dataset = dataset)
   
-  # query to create view in duckdb to the parquet file
-  view_query <- paste0("CREATE VIEW '", dataset, 
-                       "' AS SELECT * FROM parquet_scan('",
-                       parquet, "');")
-  
   # check for a cached connection
   conn <- mget("birddb", envir = birddb_cache, ifnotfound = NA)[["birddb"]]
   
   # Disconnect if it's an invalid connection (expired in cache)
-  if ( db_is_invalid(conn) )  
+  if ( db_is_invalid(conn) ) {
     conn <- DBI::dbDisconnect(conn, shutdown = TRUE)
+  }
   
   # We don't have a valid cached connection, so we must create one! 
   if (!inherits(conn, "DBIConnection")){
@@ -66,6 +62,10 @@ ebird_conn <- function(dataset = c("observations", "checklists"),
 
   # create the view if does not exist
   if (!dataset %in% DBI::dbListTables(conn)){
+    # query to create view in duckdb to the parquet file
+    view_query <- paste0("CREATE VIEW '", dataset, 
+                         "' AS SELECT * FROM parquet_scan('",
+                         parquet, "');")
     DBI::dbSendQuery(conn, view_query)
   }
   
@@ -79,8 +79,7 @@ ebird_conn <- function(dataset = c("observations", "checklists"),
 
 ## 
 db_is_invalid <- function(conn) {
-  if (!inherits(conn, "DBIConnection")) return(FALSE)
-  !DBI::dbIsValid(conn)
+  inherits(conn, "DBIConnection") && !DBI::dbIsValid(conn)
 }
 
 ebird_parquet_files <- function(dataset = c("observations", "checklists")) {
