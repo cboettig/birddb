@@ -97,7 +97,11 @@ import_ebird <- function(tarfile) {
   }
   
   # open tsv and set up data schema
-  ds <- arrow_open_ebird_txt(ebd, dest)
+  ## ds <- arrow_open_ebird_txt(ebd)
+  ds <- arrow::open_dataset(ebd, format="text", delim="\t")
+  
+  # clean up column names
+  ds <- safe_names(ds)
   
   # stream to parquet
   arrow::write_dataset(ds, dest, format = "parquet")
@@ -109,7 +113,17 @@ import_ebird <- function(tarfile) {
   invisible(dest)
 }
 
-arrow_open_ebird_txt <- function(ebd, dest) {
+safe_names <- function(ds){
+  col_names <- names(ds)
+  names(col_names) <- gsub("[/ ]", "_", tolower(col_names))
+  i <- vapply(col_names, function(x) nchar(x) > 0, logical(1L))
+  col_names <- col_names[i]
+  ds <- dplyr::select(ds, dplyr::all_of(col_names))
+}
+
+
+
+arrow_open_ebird_txt <- function(ebd) {
   ds <- arrow::open_dataset(ebd, format = "text", delim = "\t")
   col_names <- names(ds)
   # drop the empty column that appears at the end of edb files
@@ -138,9 +152,10 @@ arrow_open_ebird_txt <- function(ebd, dest) {
 
 ebird_col_type <- function(col_names) {
   # types for columns that are not character
-  col_types <- c(`LAST EDITED DATE` = "timestamp", 
-                 `TAXONOMIC ORDER` = "integer", 
-                 `LATITUDE` = "double", `LONGITUDE` = "double", 
+  col_types <- c(`LAST EDITED DATE` = "string", ## Obviously not, but fails on relJuly-2021
+                 `TAXONOMIC ORDER` = "string", 
+                 `LATITUDE` = "double",
+                 `LONGITUDE` = "double", 
                  `OBSERVATION DATE` = "date",
                  `DURATION MINUTES` = "integer", 
                  `EFFORT DISTANCE KM` = "double", 

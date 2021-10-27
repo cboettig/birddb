@@ -73,18 +73,21 @@ import_ebird(tar)
 Once the data have been downloaded and imported successfully, a user can access the full ebird record quite quickly:
 
 ```{r}  
-df <- ebird()
-df
+chklists <- checklists()
+obs <- observations()
+
 ```
 
 Now, we can use `dplyr` to perform standard queries:
 
 ```{r}
-colnames(df)
+colnames(obs)
 ```
 
 ```{r}
-df %>% count(scientific_name, sort=TRUE)
+sp <- obs %>% count(`SCIENTIFIC NAME`, sort=TRUE)
+
+bench::bench_time({collect(sp)})
 ```
 
 
