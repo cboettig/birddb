@@ -1,5 +1,7 @@
 ---
 output: github_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -12,8 +14,7 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 
-
-Sys.setenv("BIRDDB_HOME"=tempdir())
+Sys.setenv("BIRDDB_HOME" = tempdir())
 ```
 
 # birddb
@@ -44,22 +45,18 @@ devtools::install_github("cboettig/birddb")
 ```
 ## Getting Started
 
-
-
-```{r}
+```{r message=FALSE}
 library(birddb)
 library(dplyr)
 ```
 
-Before you can use `birddb` you will need to download the latest version of eBird from http://ebird.org/ebird/data/download.
-Once you have obtained a downloaded copy of the `tar` file, `birddb` can import it for you:
-The one-time import of the full data dump is a little slow (about 1 hr in my benchmark) due to the time required to extract the 
-tar file and convert the text data into parquet format.
+Before you can use `birddb` you will need to download the latest version of the eBird Basic Dataset from http://ebird.org/ebird/data/download.
+Once you have obtained a downloaded copy of the `tar` file, `birddb` can import it for you. The one-time import of the full data dump is a little slow (about 1 hr in my benchmark) due to the time required to extract the tar file and convert the text data into parquet format.
 
-For illustration & testing purposes, we will use the small eBird sample data, included in the package for convenience and testing purposes:
+For illustration and testing purposes, we will use the small eBird sample data, included in the package for convenience and testing purposes:
 
 ```{r}
-tar <- ebird_sample_data()
+tar <- birddb::sample_observation_data()
 ```
 
 Importing will now create the local parquet-based copies in the default directory given by `ebird_data_dir()`.
@@ -73,7 +70,7 @@ import_ebird(tar)
 Once the data have been downloaded and imported successfully, a user can access the full ebird record quite quickly:
 
 ```{r}  
-df <- ebird()
+df <- observations()
 df
 ```
 
@@ -84,7 +81,7 @@ colnames(df)
 ```
 
 ```{r}
-df %>% count(scientific_name, sort=TRUE)
+df %>% count(scientific_name, sort = TRUE)
 ```
 
 
@@ -93,5 +90,3 @@ df %>% count(scientific_name, sort=TRUE)
 Sys.unsetenv("BIRDDB_HOME")
 
 ```
-
-

@@ -9,6 +9,12 @@
 #'   website. Files containing either observation data (e.g.
 #'   `ebd_rel<DATE>.tar`) or checklist (e.g. `ebd_sampling_rel<DATE>.tar`) data
 #'   can be provided
+#' @param temp_dir a temporary directory used to store the untarred input file. 
+#'   In general, this parameter should be left as the default, which stores will 
+#'   use the system temp directory. However, the untarred file is very large (> 
+#'   100 GB), and if you run into disk space issues, you may need to change the 
+#'   `temp_dir`, for example, to an external drive. Note that **all temporary 
+#'   files created by [import_ebird()] prior to the function returning.**.
 #'   
 #' @details 
 #' [eBird](https://ebird.org/home) data are collected and organized around the
@@ -54,7 +60,7 @@
 #' import_ebird(tar)
 #' 
 #' unlink(temp_dir, recursive = TRUE)
-import_ebird <- function(tarfile) {
+import_ebird <- function(tarfile, temp_dir = tempdir(check = TRUE)) {
   if (is_checklists(tarfile)) {
     dataset <- "checklists"
   } else if (is_observations(tarfile, allow_subset = FALSE)) {
@@ -67,6 +73,8 @@ import_ebird <- function(tarfile) {
     stop("Non-stardard eBird data filename provided: ", basename(tarfile))
   }
   dest <- file.path(ebird_data_dir(), dataset)
+  
+  stopifnot(is.character(temp_dir), length(temp_dir) == 1, dir.exists(temp_dir))
   
   # confirm overwrite
   if (dir.exists(dest)) {
@@ -87,7 +95,7 @@ import_ebird <- function(tarfile) {
                   dataset, basename(tarfile)))
   
   # extract the tarfile to a temp directory
-  source_dir <- tempfile("ebird_tmp")
+  source_dir <- tempfile("ebird_tmp", tmpdir = temp_dir)
   dir.create(source_dir, recursive = TRUE)
   utils::untar(tarfile = tarfile, exdir = source_dir)
   ebd <- list.files(source_dir, pattern = "ebd.*\\.txt\\.gz",
@@ -194,7 +202,7 @@ record_metadata <- function(tarfile) {
   }
   
   # sha256 file hash
-  hash <- openssl::sha256(file(tarfile))
+  hash <- digest::digest(tarfile, algo = "crc32", file = TRUE)
   
   # save to csv
   file_metadata <- data.frame(dataset = dataset, 
@@ -202,11 +210,11 @@ record_metadata <- function(tarfile) {
                               subset = subset, 
                               source_file = tarfile,
                               file_size = file.size(tarfile),
-                              hash_sha256 = as.character(hash)[],
+                              hash_crc32 = as.character(hash)[],
                               timestamp = Sys.time())
   f_metadata <- file.path(ebird_data_dir(),
                           paste0(dataset, "-metadata.csv"))
-  utils::write.csv(file_metadata, file = f_metadata, row.names = FALSE)
+  utils::write.csv(file_metadata, file = f_metadata, row.names = FALSE, na = "")
   
   invisible(file_metadata)
 }

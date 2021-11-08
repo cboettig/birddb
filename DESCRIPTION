@@ -19,7 +19,7 @@ Imports:
     DBI,
     dplyr,
     dbplyr,
-    openssl,
+    digest,
     utils
 Suggests:
     spelling,
