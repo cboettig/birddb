@@ -120,8 +120,13 @@ import_ebird <- function(tarfile, temp_dir = tempdir(check = TRUE)) {
 arrow_open_ebird_txt <- function(ebd, dest) {
   ds <- arrow::open_dataset(ebd, format = "text", delim = "\t")
   col_names <- names(ds)
-  # drop the empty column that appears at the end of edb files
-  col_names <- col_names[col_names != ""] 
+  
+  # provide names to empty columns to be dropped later
+  empty_cols <- which(col_names == "")
+  if (length(col_names) > 0) {
+    col_names[empty_cols] <- paste0(".dropcol_", seq_along(empty_cols))
+  }
+  
   col_types <- ebird_col_type(col_names)
   expand_schema = list(string = arrow::string(), 
                        binary = arrow::binary(),
@@ -139,7 +144,7 @@ arrow_open_ebird_txt <- function(ebd, dest) {
   # clean up column names
   col_names <- names(ds)
   names(col_names) <- gsub("[/ ]", "_", tolower(col_names))
-  ds <- dplyr::select(ds, dplyr::all_of(col_names))
+  ds <- dplyr::select(ds, -dplyr::starts_with(".dropcol"))
   
   return(ds)
 }
