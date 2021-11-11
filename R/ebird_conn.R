@@ -32,7 +32,7 @@
 #' unlink(temp_dir, recursive = TRUE)
 ebird_conn <- function(dataset = c("observations", "checklists"), 
                        cache_connection = TRUE,
-                       memory_limit = 4) {
+                       memory_limit = 16) {
   
   dataset <- match.arg(dataset)
   

@@ -56,37 +56,39 @@ Once you have obtained a downloaded copy of the `tar` file, `birddb` can import 
 For illustration and testing purposes, we will use the small eBird sample data, included in the package for convenience and testing purposes:
 
 ```{r}
-tar <- birddb::sample_observation_data()
+observations_tar <- birddb::sample_observation_data()
+checklists_tar <- birddb::sample_checklist_data()
 ```
 
 Importing will now create the local parquet-based copies in the default directory given by `ebird_data_dir()`.
 Users can set an alternative location by setting the environmental variable `BIRDDB_HOME` to the desired path.
 
 ```{r}
-import_ebird(tar)
+import_ebird(observations_tar)
+import_ebird(checklists_tar)
 ```
 
-
-Once the data have been downloaded and imported successfully, a user can access the full ebird record quite quickly:
+Once the data have been downloaded and imported successfully, a user can access the full eBird dataset quite quickly:
 
 ```{r}  
-df <- observations()
-df
+observations <- observations()
+checklists <- checklists()
 ```
 
-Now, we can use `dplyr` to perform standard queries:
+To see the available columns in each dataset use:
 
 ```{r}
-colnames(df)
+colnames(observations)
+colnames(checklists)
 ```
+
+Now, we can use `dplyr` to perform standard queries. For example, to see the number of observations for each species in the sample dataset:
 
 ```{r}
-df %>% count(scientific_name, sort = TRUE)
+observations %>% count(scientific_name, sort = TRUE)
 ```
-
 
 
 ```{r include=FALSE}
 Sys.unsetenv("BIRDDB_HOME")
-
 ```
