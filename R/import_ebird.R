@@ -118,14 +118,8 @@ import_ebird <- function(tarfile, temp_dir = tempdir(check = TRUE)) {
 }
 
 arrow_open_ebird_txt <- function(ebd, dest) {
-  ds <- arrow::open_dataset(ebd, format = "text", delim = "\t")
+  ds <- arrow::open_dataset(ebd, format = "tsv")
   col_names <- names(ds)
-  
-  # provide names to empty columns to be dropped later
-  empty_cols <- which(col_names == "")
-  if (length(col_names) > 0) {
-    col_names[empty_cols] <- paste0(".dropcol_", seq_along(empty_cols))
-  }
   
   col_types <- ebird_col_type(col_names)
   expand_schema = list(string = arrow::string(), 
@@ -139,12 +133,13 @@ arrow_open_ebird_txt <- function(ebd, dest) {
   sch <- do.call(arrow::schema, ebd_schema)
   
   # based on the schema defined above open tsv file for streaming
-  ds <- arrow::open_dataset(ebd, format = "text", delim = "\t", schema = sch)
+  ds <- arrow::open_dataset(ebd, format = "tsv", schema = sch, skip_rows = 1)
   
   # clean up column names
   col_names <- names(ds)
+  col_names <- col_names[col_names != ""] 
   names(col_names) <- gsub("[/ ]", "_", tolower(col_names))
-  ds <- dplyr::select(ds, -dplyr::starts_with(".dropcol"))
+  ds <- dplyr::select(ds, dplyr::all_of(col_names))
   
   return(ds)
 }
