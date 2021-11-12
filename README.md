@@ -58,7 +58,8 @@ sample data, included in the package for convenience and testing
 purposes:
 
 ``` r
-tar <- birddb::sample_observation_data()
+observations_tar <- birddb::sample_observation_data()
+checklists_tar <- birddb::sample_checklist_data()
 ```
 
 Importing will now create the local parquet-based copies in the default
@@ -67,43 +68,28 @@ location by setting the environmental variable `BIRDDB_HOME` to the
 desired path.
 
 ``` r
-import_ebird(tar)
+import_ebird(observations_tar)
 #> Importing observations data from the eBird Basic Dataset: ebd_relAug-2021.tar
+#> Extracting from tar archive...
+#> Importing to parquet...
+import_ebird(checklists_tar)
+#> Importing checklists data from the eBird Basic Dataset: ebd_sampling_relAug-2021.tar
+#> Extracting from tar archive...
+#> Importing to parquet...
 ```
 
 Once the data have been downloaded and imported successfully, a user can
-access the full ebird record quite quickly:
+access the full eBird dataset quite quickly:
 
 ``` r
-df <- observations()
-df
-#> # Source:   table<observations> [?? x 47]
-#> # Database: duckdb_connection
-#>    global_unique_iden… last_edited_date    taxonomic_order category common_name 
-#>    <chr>               <dttm>                        <dbl> <chr>    <chr>       
-#>  1 URN:CornellLabOfOr… 2021-08-18 16:09:33           30837 issf     American Pi…
-#>  2 URN:CornellLabOfOr… 2021-04-02 05:37:30           27816 species  Asian Brown…
-#>  3 URN:CornellLabOfOr… 2020-07-18 00:09:45           27816 species  Asian Brown…
-#>  4 URN:CornellLabOfOr… 2019-12-30 10:02:16           27816 species  Asian Brown…
-#>  5 URN:CornellLabOfOr… 2019-12-30 10:11:42           27816 species  Asian Brown…
-#>  6 URN:CornellLabOfOr… 2020-07-18 00:09:45            8628 species  Asian Barre…
-#>  7 URN:CornellLabOfOr… 2021-04-02 05:44:29           19665 species  Ashy Drongo 
-#>  8 URN:CornellLabOfOr… 2019-12-30 10:02:16           19674 issf     Ashy Drongo 
-#>  9 URN:CornellLabOfOr… 2019-12-30 10:11:42           23414 species  Asian House…
-#> 10 URN:CornellLabOfOr… 2019-09-07 20:23:59            3200 species  Asian Koel  
-#> # … with more rows, and 42 more variables: scientific_name <chr>,
-#> #   subspecies_common_name <chr>, subspecies_scientific_name <chr>,
-#> #   observation_count <chr>, breeding_code <chr>, breeding_category <chr>,
-#> #   behavior_code <chr>, age_sex <chr>, country <chr>, country_code <chr>,
-#> #   state <chr>, state_code <chr>, county <chr>, county_code <chr>,
-#> #   iba_code <chr>, bcr_code <chr>, usfws_code <chr>, atlas_block <chr>,
-#> #   locality <chr>, locality_id <chr>, locality_type <chr>, latitude <dbl>, …
+observations <- observations()
+checklists <- checklists()
 ```
 
-Now, we can use `dplyr` to perform standard queries:
+To see the available columns in each dataset use:
 
 ``` r
-colnames(df)
+colnames(observations)
 #>  [1] "global_unique_identifier"   "last_edited_date"          
 #>  [3] "taxonomic_order"            "category"                  
 #>  [5] "common_name"                "scientific_name"           
@@ -128,10 +114,29 @@ colnames(df)
 #> [43] "approved"                   "reviewed"                  
 #> [45] "reason"                     "trip_comments"             
 #> [47] "species_comments"
+colnames(checklists)
+#>  [1] "last_edited_date"          "country"                  
+#>  [3] "country_code"              "state"                    
+#>  [5] "state_code"                "county"                   
+#>  [7] "county_code"               "iba_code"                 
+#>  [9] "bcr_code"                  "usfws_code"               
+#> [11] "atlas_block"               "locality"                 
+#> [13] "locality_id"               "locality_type"            
+#> [15] "latitude"                  "longitude"                
+#> [17] "observation_date"          "time_observations_started"
+#> [19] "observer_id"               "sampling_event_identifier"
+#> [21] "protocol_type"             "protocol_code"            
+#> [23] "project_code"              "duration_minutes"         
+#> [25] "effort_distance_km"        "effort_area_ha"           
+#> [27] "number_observers"          "all_species_reported"     
+#> [29] "group_identifier"          "trip_comments"
 ```
 
+Now, we can use `dplyr` to perform standard queries. For example, to see
+the number of observations for each species in the sample dataset:
+
 ``` r
-df %>% count(scientific_name, sort = TRUE)
+observations %>% count(scientific_name, sort = TRUE)
 #> # Source:     lazy query [?? x 2]
 #> # Database:   duckdb_connection
 #> # Ordered by: desc(n)

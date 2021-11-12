@@ -4,20 +4,13 @@
 \alias{import_ebird}
 \title{Import eBird data to parquet}
 \usage{
-import_ebird(tarfile, temp_dir = tempdir(check = TRUE))
+import_ebird(tarfile)
 }
 \arguments{
 \item{tarfile}{path to the tar archive file downloaded from the eBird
 website. Files containing either observation data (e.g.
 \verb{ebd_rel<DATE>.tar}) or checklist (e.g. \verb{ebd_sampling_rel<DATE>.tar}) data
 can be provided}
-
-\item{temp_dir}{a temporary directory used to store the untarred input file.
-In general, this parameter should be left as the default, which stores will
-use the system temp directory. However, the untarred file is very large (>
-100 GB), and if you run into disk space issues, you may need to change the
-\code{temp_dir}, for example, to an external drive. Note that \strong{all temporary
-files created by \code{\link[=import_ebird]{import_ebird()}} prior to the function returning.}.}
 }
 \value{
 Invisibly return the path to the directory containing eBird parquet
