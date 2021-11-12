@@ -9,12 +9,6 @@
 #'   website. Files containing either observation data (e.g.
 #'   `ebd_rel<DATE>.tar`) or checklist (e.g. `ebd_sampling_rel<DATE>.tar`) data
 #'   can be provided
-#' @param temp_dir a temporary directory used to store the untarred input file. 
-#'   In general, this parameter should be left as the default, which stores will 
-#'   use the system temp directory. However, the untarred file is very large (> 
-#'   100 GB), and if you run into disk space issues, you may need to change the 
-#'   `temp_dir`, for example, to an external drive. Note that **all temporary 
-#'   files created by [import_ebird()] prior to the function returning.**.
 #'   
 #' @details 
 #' [eBird](https://ebird.org/home) data are collected and organized around the
@@ -60,7 +54,7 @@
 #' import_ebird(tar)
 #' 
 #' unlink(temp_dir, recursive = TRUE)
-import_ebird <- function(tarfile, temp_dir = tempdir(check = TRUE)) {
+import_ebird <- function(tarfile) {
   if (is_checklists(tarfile)) {
     dataset <- "checklists"
   } else if (is_observations(tarfile, allow_subset = FALSE)) {
@@ -73,8 +67,6 @@ import_ebird <- function(tarfile, temp_dir = tempdir(check = TRUE)) {
     stop("Non-stardard eBird data filename provided: ", basename(tarfile))
   }
   dest <- file.path(ebird_data_dir(), dataset)
-  
-  stopifnot(is.character(temp_dir), length(temp_dir) == 1, dir.exists(temp_dir))
   
   # confirm overwrite
   if (dir.exists(dest)) {
@@ -95,7 +87,9 @@ import_ebird <- function(tarfile, temp_dir = tempdir(check = TRUE)) {
                   dataset, basename(tarfile)))
   
   # extract the tarfile to a temp directory
-  source_dir <- tempfile("ebird_tmp", tmpdir = temp_dir)
+  message("Extracting from tar archive...")
+  source_dir <- file.path(ebird_data_dir(), "ebird_tmp")
+  unlink(source_dir, recursive = TRUE)
   dir.create(source_dir, recursive = TRUE)
   utils::untar(tarfile = tarfile, exdir = source_dir)
   ebd <- list.files(source_dir, pattern = "ebd.*\\.txt\\.gz",
@@ -108,6 +102,7 @@ import_ebird <- function(tarfile, temp_dir = tempdir(check = TRUE)) {
   ds <- arrow_open_ebird_txt(ebd, dest)
   
   # stream to parquet
+  message("Importing to parquet...")
   arrow::write_dataset(ds, dest, format = "parquet")
   
   # save metadata
