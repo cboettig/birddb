@@ -70,13 +70,6 @@ jobs:
           install.packages("https://github.com/duckdb/duckdb/releases/download/master-builds/duckdb_r_src.tar.gz", repos = NULL)
         shell: Rscript {0}
         
-      - name: arrow nightly
-        if: runner.r == "devel"
-        run: |
-          arrow::install_arrow(TRUE, FALSE, minimal=FALSE)
-        shell: Rscript {0}
-        
-        
       - name: Check
         env:
           _R_CHECK_CRAN_INCOMING_REMOTE_: false
