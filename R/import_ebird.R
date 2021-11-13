@@ -87,7 +87,9 @@ import_ebird <- function(tarfile) {
                   dataset, basename(tarfile)))
   
   # extract the tarfile to a temp directory
-  source_dir <- tempfile("ebird_tmp")
+  message("Extracting from tar archive...")
+  source_dir <- file.path(ebird_data_dir(), "ebird_tmp")
+  unlink(source_dir, recursive = TRUE)
   dir.create(source_dir, recursive = TRUE)
   utils::untar(tarfile = tarfile, exdir = source_dir)
   ebd <- list.files(source_dir, pattern = "ebd.*\\.txt\\.gz",
@@ -100,6 +102,7 @@ import_ebird <- function(tarfile) {
   ds <- arrow_open_ebird_txt(ebd, dest)
   
   # stream to parquet
+  message("Importing to parquet...")
   arrow::write_dataset(ds, dest, format = "parquet")
   
   # save metadata
@@ -110,10 +113,9 @@ import_ebird <- function(tarfile) {
 }
 
 arrow_open_ebird_txt <- function(ebd, dest) {
-  ds <- arrow::open_dataset(ebd, format = "text", delim = "\t")
+  ds <- arrow::open_dataset(ebd, format = "tsv")
   col_names <- names(ds)
-  # drop the empty column that appears at the end of edb files
-  col_names <- col_names[col_names != ""] 
+  
   col_types <- ebird_col_type(col_names)
   expand_schema = list(string = arrow::string(), 
                        binary = arrow::binary(),
@@ -126,10 +128,11 @@ arrow_open_ebird_txt <- function(ebd, dest) {
   sch <- do.call(arrow::schema, ebd_schema)
   
   # based on the schema defined above open tsv file for streaming
-  ds <- arrow::open_dataset(ebd, format = "text", delim = "\t", schema = sch)
+  ds <- arrow::open_dataset(ebd, format = "tsv", schema = sch, skip_rows = 1)
   
   # clean up column names
   col_names <- names(ds)
+  col_names <- col_names[col_names != ""] 
   names(col_names) <- gsub("[/ ]", "_", tolower(col_names))
   ds <- dplyr::select(ds, dplyr::all_of(col_names))
   
@@ -194,7 +197,7 @@ record_metadata <- function(tarfile) {
   }
   
   # sha256 file hash
-  hash <- openssl::sha256(file(tarfile))
+  hash <- digest::digest(tarfile, algo = "crc32", file = TRUE)
   
   # save to csv
   file_metadata <- data.frame(dataset = dataset, 
@@ -202,11 +205,11 @@ record_metadata <- function(tarfile) {
                               subset = subset, 
                               source_file = tarfile,
                               file_size = file.size(tarfile),
-                              hash_sha256 = as.character(hash)[],
+                              hash_crc32 = as.character(hash)[],
                               timestamp = Sys.time())
   f_metadata <- file.path(ebird_data_dir(),
                           paste0(dataset, "-metadata.csv"))
-  utils::write.csv(file_metadata, file = f_metadata, row.names = FALSE)
+  utils::write.csv(file_metadata, file = f_metadata, row.names = FALSE, na = "")
   
   invisible(file_metadata)
 }

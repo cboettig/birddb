@@ -44,28 +44,22 @@ devtools::install_github("cboettig/birddb")
 ``` r
 library(birddb)
 library(dplyr)
-#> 
-#> Attaching package: 'dplyr'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#> 
-#>     intersect, setdiff, setequal, union
 ```
 
 Before you can use `birddb` you will need to download the latest version
-of eBird from <http://ebird.org/ebird/data/download>. Once you have
-obtained a downloaded copy of the `tar` file, `birddb` can import it for
-you: The one-time import of the full data dump is a little slow (about 1
-hr in my benchmark) due to the time required to extract the tar file and
-convert the text data into parquet format.
+of the eBird Basic Dataset from <http://ebird.org/ebird/data/download>.
+Once you have obtained a downloaded copy of the `tar` file, `birddb` can
+import it for you. The one-time import of the full data dump is a little
+slow (about 1 hr in my benchmark) due to the time required to extract
+the tar file and convert the text data into parquet format.
 
-For illustration & testing purposes, we will use the small eBird sample
-data, included in the package for convenience and testing purposes:
+For illustration and testing purposes, we will use the small eBird
+sample data, included in the package for convenience and testing
+purposes:
 
 ``` r
-tar <- ebird_sample_data()
+observations_tar <- birddb::sample_observation_data()
+checklists_tar <- birddb::sample_checklist_data()
 ```
 
 Importing will now create the local parquet-based copies in the default
@@ -74,42 +68,28 @@ location by setting the environmental variable `BIRDDB_HOME` to the
 desired path.
 
 ``` r
-import_ebird(tar)
+import_ebird(observations_tar)
+#> Importing observations data from the eBird Basic Dataset: ebd_relAug-2021.tar
+#> Extracting from tar archive...
+#> Importing to parquet...
+import_ebird(checklists_tar)
+#> Importing checklists data from the eBird Basic Dataset: ebd_sampling_relAug-2021.tar
+#> Extracting from tar archive...
+#> Importing to parquet...
 ```
 
 Once the data have been downloaded and imported successfully, a user can
-access the full ebird record quite quickly:
+access the full eBird dataset quite quickly:
 
 ``` r
-df <- ebird()
-df
-#> # Source:   table<ebd> [?? x 47]
-#> # Database: duckdb_connection
-#>    global_unique_iden… last_edited_date    taxonomic_order category common_name 
-#>    <chr>               <dttm>                        <dbl> <chr>    <chr>       
-#>  1 URN:CornellLabOfOr… 2021-03-20 21:48:09           25797 species  Ruby-crowne…
-#>  2 URN:CornellLabOfOr… 2021-03-20 21:48:09           26950 species  Brown Thras…
-#>  3 URN:CornellLabOfOr… 2021-04-03 23:33:38            7029 species  American Wh…
-#>  4 URN:CornellLabOfOr… 2021-03-20 21:48:09           31943 species  White-throa…
-#>  5 URN:CornellLabOfOr… 2021-03-20 21:48:09           32155 species  Eastern Tow…
-#>  6 URN:CornellLabOfOr… 2021-03-25 12:14:45            2316 species  White-winge…
-#>  7 URN:CornellLabOfOr… 2021-03-08 12:45:11           31986 species  Savannah Sp…
-#>  8 URN:CornellLabOfOr… 2021-03-19 21:23:57           21225 species  Tufted Titm…
-#>  9 URN:CornellLabOfOr… 2021-03-03 21:23:28           27031 species  Eastern Blu…
-#> 10 URN:CornellLabOfOr… 2021-03-22 01:11:30            5942 species  Wilson's Sn…
-#> # … with more rows, and 42 more variables: scientific_name <chr>,
-#> #   subspecies_common_name <chr>, subspecies_scientific_name <chr>,
-#> #   observation_count <chr>, breeding_code <chr>, breeding_category <chr>,
-#> #   behavior_code <chr>, age_sex <chr>, country <chr>, country_code <chr>,
-#> #   state <chr>, state_code <chr>, county <chr>, county_code <chr>,
-#> #   iba_code <chr>, bcr_code <dbl>, usfws_code <chr>, atlas_block <chr>,
-#> #   locality <chr>, locality_id <chr>, locality_type <chr>, latitude <dbl>, …
+observations <- observations()
+checklists <- checklists()
 ```
 
-Now, we can use `dplyr` to perform standard queries:
+To see the available columns in each dataset use:
 
 ``` r
-colnames(df)
+colnames(observations)
 #>  [1] "global_unique_identifier"   "last_edited_date"          
 #>  [3] "taxonomic_order"            "category"                  
 #>  [5] "common_name"                "scientific_name"           
@@ -134,24 +114,43 @@ colnames(df)
 #> [43] "approved"                   "reviewed"                  
 #> [45] "reason"                     "trip_comments"             
 #> [47] "species_comments"
+colnames(checklists)
+#>  [1] "last_edited_date"          "country"                  
+#>  [3] "country_code"              "state"                    
+#>  [5] "state_code"                "county"                   
+#>  [7] "county_code"               "iba_code"                 
+#>  [9] "bcr_code"                  "usfws_code"               
+#> [11] "atlas_block"               "locality"                 
+#> [13] "locality_id"               "locality_type"            
+#> [15] "latitude"                  "longitude"                
+#> [17] "observation_date"          "time_observations_started"
+#> [19] "observer_id"               "sampling_event_identifier"
+#> [21] "protocol_type"             "protocol_code"            
+#> [23] "project_code"              "duration_minutes"         
+#> [25] "effort_distance_km"        "effort_area_ha"           
+#> [27] "number_observers"          "all_species_reported"     
+#> [29] "group_identifier"          "trip_comments"
 ```
 
+Now, we can use `dplyr` to perform standard queries. For example, to see
+the number of observations for each species in the sample dataset:
+
 ``` r
-df %>% count(scientific_name, sort=TRUE)
+observations %>% count(scientific_name, sort = TRUE)
 #> # Source:     lazy query [?? x 2]
 #> # Database:   duckdb_connection
 #> # Ordered by: desc(n)
-#>    scientific_name              n
-#>    <chr>                    <dbl>
-#>  1 Cardinalis cardinalis      125
-#>  2 Mimus polyglottos           86
-#>  3 Haemorhous mexicanus        73
-#>  4 Turdus migratorius          68
-#>  5 Sialia sialis               67
-#>  6 Zenaida asiatica            66
-#>  7 Zenaida macroura            64
-#>  8 Thryothorus ludovicianus    64
-#>  9 Spinus pinus                54
-#> 10 Cyanocitta cristata         44
+#>    scientific_name                n
+#>    <chr>                      <dbl>
+#>  1 Pycnonotus sinensis          275
+#>  2 Pycnonotus jocosus           270
+#>  3 Streptopelia chinensis       258
+#>  4 Milvus migrans               251
+#>  5 Copsychus saularis           228
+#>  6 Zosterops simplex            201
+#>  7 Acridotheres cristatellus    181
+#>  8 Passer montanus              174
+#>  9 Pterorhinus perspicillatus   172
+#> 10 Motacilla alba               172
 #> # … with more rows
 ```
