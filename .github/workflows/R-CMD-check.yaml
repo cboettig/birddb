@@ -26,7 +26,6 @@ jobs:
           - {os: macOS-latest, r: 'release'}
           - {os: ubuntu-20.04, r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
           - {os: ubuntu-20.04,   r: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", http-user-agent: "R/4.1.0 (ubuntu-20.04) R (4.1.0 x86_64-pc-linux-gnu x86_64 linux-gnu) on GitHub Actions" }
-          - {os: ubuntu-20.04, r: 'release', arrow: 'devel',  rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
 
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
@@ -70,13 +69,6 @@ jobs:
           remotes::install_cran("rcmdcheck")
           install.packages("https://github.com/duckdb/duckdb/releases/download/master-builds/duckdb_r_src.tar.gz", repos = NULL)
         shell: Rscript {0}
-        
-      - name: arrow nightly
-        if: runner.arrow == "devel"
-        run: |
-          arrow::install_arrow(TRUE, FALSE, minimal=FALSE)
-        shell: Rscript {0}
-        
         
       - name: Check
         env:
