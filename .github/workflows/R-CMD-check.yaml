@@ -68,7 +68,7 @@ jobs:
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("rcmdcheck")
           install.packages("https://github.com/duckdb/duckdb/releases/download/master-builds/duckdb_r_src.tar.gz", repos = NULL)
-          install.packages("arrow", repos = "https://arrow-r-nightly.s3.amazonaws.com")
+  #        install.packages("arrow", repos = "https://arrow-r-nightly.s3.amazonaws.com")
 
         shell: Rscript {0}
 
