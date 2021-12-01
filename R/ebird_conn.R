@@ -60,6 +60,8 @@ ebird_conn <- function(dataset = c("observations", "checklists"),
   DBI::dbExecute(conn = conn, 
                  paste0("PRAGMA memory_limit='", memory_limit, "GB'"))
 
+  # set CPU parallel
+  DBI::dbExecute(conn, paste0("PRAGMA threads=", arrow::cpu_count()))
   # create the view if does not exist
   if (!dataset %in% DBI::dbListTables(conn)){
     # query to create view in duckdb to the parquet file

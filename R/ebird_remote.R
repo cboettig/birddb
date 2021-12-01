@@ -20,11 +20,11 @@ ebird_remote <-
     function(version = "Jul-2021",
             bucket = "ebird",
             to_duckdb = FALSE,
-            host = "minio.thelio.carlboettiger.info",
+            host = "minio.cirrus.carlboettiger.info",
             ...) {
 
     server <- arrow::s3_bucket(bucket, endpoint_override = host)
-    path <- server$path(version)
+    path <- server$path(paste0(version, "/observations"))
     df <- arrow::open_dataset(path)
     if (to_duckdb) {
         if (!requireNamespace("dplyr", quietly = TRUE))
