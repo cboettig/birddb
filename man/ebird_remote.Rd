@@ -8,7 +8,7 @@ ebird_remote(
   version = "Jul-2021",
   bucket = "ebird",
   to_duckdb = FALSE,
-  host = "minio.thelio.carlboettiger.info",
+  host = "minio.cirrus.carlboettiger.info",
   ...
 )
 }
