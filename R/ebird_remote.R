@@ -11,37 +11,40 @@
 #' @param to_duckdb Return a remote duckdb connection or arrow connection?
 #'   Note that leaving as FALSE may be faster but is limited to the dplyr-style
 #'   operations supported by [arrow] alone.
+#' @param dataset name of dataset (table) to access.
+#' @param host Remote S3-based host of eBird parquet data
 #' @param ... additional parameters passed to the s3_bucket() (e.g. for remote
 #'  access to independently hosted buckets)
 #' @examplesIf interactive()
 #' @export
 #'
 ebird_remote <-
-    function(version = "Jul-2021",
-            bucket = "ebird",
-            to_duckdb = FALSE,
-            host = "minio.cirrus.carlboettiger.info",
-            ...) {
-        
-    ## Not ideal, but these will cause problems if set    
+  function(dataset = c("observations", "checklists"),
+           version = "Oct-2021",
+           bucket = "ebird",
+           to_duckdb = FALSE,
+           host = "minio.cirrus.carlboettiger.info",
+           ...) {
+    dataset <- match.arg(dataset)
+    
+    ## Not ideal, but these will cause problems if set
     unset_aws_env()
-        
-    server <- arrow::s3_bucket(bucket, 
+    
+    server <- arrow::s3_bucket(bucket,
                                endpoint_override = host,
                                ...)
     
-    path <- server$path(paste0(version, "/observations"))
+    path <- server$path(file.path(version, dataset, fsep = "/"))
     df <- arrow::open_dataset(path)
     if (to_duckdb) {
-        if (!requireNamespace("dplyr", quietly = TRUE))
-            stop("please install dplyr to use duckdb-based format")
-        tbl <- getExportedValue("dplyr", "tbl")
-        df <- arrow::to_duckdb(df)
+      df <- arrow::to_duckdb(df)
     }
     df
-    }
-unset_aws_env <- function(){
-  
+  }
+
+
+
+unset_aws_env <- function() {
   ## Consider re-setting these afterwards.
   ## What about ~/.aws ?
   ## Maybe set these to empty strings instead of unsetting?
@@ -52,5 +55,3 @@ unset_aws_env <- function(){
   Sys.unsetenv("AWS_ACCESS_KEY_ID")
   Sys.unsetenv("AWS_SECRET_ACCESS_KEY")
 }
-
-

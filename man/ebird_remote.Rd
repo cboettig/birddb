@@ -5,7 +5,8 @@
 \title{ebird remote}
 \usage{
 ebird_remote(
-  version = "Jul-2021",
+  dataset = c("observations", "checklists"),
+  version = "Oct-2021",
   bucket = "ebird",
   to_duckdb = FALSE,
   host = "minio.cirrus.carlboettiger.info",
@@ -13,6 +14,8 @@ ebird_remote(
 )
 }
 \arguments{
+\item{dataset}{name of dataset (table) to access.}
+
 \item{version}{eBird snapshot date}
 
 \item{bucket}{eBird bucket name (including region)}
@@ -20,6 +23,8 @@ ebird_remote(
 \item{to_duckdb}{Return a remote duckdb connection or arrow connection?
 Note that leaving as FALSE may be faster but is limited to the dplyr-style
 operations supported by \link{arrow} alone.}
+
+\item{host}{Remote S3-based host of eBird parquet data}
 
 \item{...}{additional parameters passed to the s3_bucket() (e.g. for remote
 access to independently hosted buckets)}
