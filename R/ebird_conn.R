@@ -35,12 +35,34 @@ ebird_conn <- function(dataset = c("observations", "checklists"),
                        memory_limit = 16) {
   
   dataset <- match.arg(dataset)
-  
-  stopifnot(is.logical(cache_connection), length(cache_connection) == 1)
-  stopifnot(is.numeric(memory_limit), length(memory_limit) == 1,
-            !is.na(memory_limit), memory_limit > 0)
-  
   parquet <- ebird_parquet_files(dataset = dataset)
+  
+  conn <- duckdb_connection(memory_limit = memory_limit,
+                            cache_connection = cache_connection)
+  # create the view if does not exist
+  if (!dataset %in% DBI::dbListTables(conn)){
+    # query to create view in duckdb to the parquet file
+    view_query <- paste0("CREATE VIEW '", dataset, 
+                         "' AS SELECT * FROM parquet_scan('",
+                         parquet, "');")
+    DBI::dbSendQuery(conn, view_query)
+  }
+
+  
+  conn
+}
+
+duckdb_connection <- function(dir = ebird_db_dir(),
+                              memory_limit = 16,
+                              mc.cores = arrow::cpu_count(),
+                              cache_connection = TRUE
+                              ) {
+  stopifnot(is.logical(cache_connection), 
+            length(cache_connection) == 1)
+  stopifnot(is.numeric(memory_limit), 
+            length(memory_limit) == 1,
+            !is.na(memory_limit), 
+            memory_limit > 0)
   
   # check for a cached connection
   conn <- mget("birddb", envir = birddb_cache, ifnotfound = NA)[["birddb"]]
@@ -52,29 +74,20 @@ ebird_conn <- function(dataset = c("observations", "checklists"),
   
   # We don't have a valid cached connection, so we must create one! 
   if (!inherits(conn, "DBIConnection")){
-    conn <- DBI::dbConnect(drv = duckdb::duckdb(), ebird_db_dir())  
+    conn <- DBI::dbConnect(drv = duckdb::duckdb(), dir)  
   }
   
-  # enforce memory limit
-  # TODO: temp approach for testing, improve approach in production
-  DBI::dbExecute(conn = conn, 
-                 paste0("PRAGMA memory_limit='", memory_limit, "GB'"))
+  ## PRAGMAS
+  duckdb_mem_limit(conn, memory_limit, "GB")
+  duckdb_parallel(conn, mc.cores)
+  duckdb_set_tempdir(conn, tempdir())
 
-  # create the view if does not exist
-  if (!dataset %in% DBI::dbListTables(conn)){
-    # query to create view in duckdb to the parquet file
-    view_query <- paste0("CREATE VIEW '", dataset, 
-                         "' AS SELECT * FROM parquet_scan('",
-                         parquet, "');")
-    DBI::dbSendQuery(conn, view_query)
-  }
-  
   # (re)-cache the connection
   if (cache_connection) {
     assign("birddb", conn, envir = birddb_cache)
   }
-  
-  conn
+
+conn
 }
 
 ## 
