@@ -31,7 +31,7 @@ The goal of `birddb` is to provide a relational database interface to a local co
 
 ## Installation
 
-You can install the released version of `birddb` from [CRAN](https://CRAN.R-project.org) with:
+You can install the released version of `birddb` from [CRAN](https://CRAN.R-project.org) (once released):
 
 ``` r
 install.packages("birddb")
@@ -43,6 +43,15 @@ And the development version from [GitHub](https://github.com/) with:
 # install.packages("devtools")
 devtools::install_github("cboettig/birddb")
 ```
+
+**NOTE**: `birddb` currently requires the dev version of `duckdb`, which you can install using:
+
+```r
+install.packages("https://github.com/duckdb/duckdb/releases/download/master-builds/duckdb_r_src.tar.gz", repos = NULL)
+```
+
+
+
 ## Getting Started
 
 ```{r message=FALSE}

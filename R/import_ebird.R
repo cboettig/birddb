@@ -114,6 +114,8 @@ import_ebird <- function(tarfile) {
 }
 
 arrow_open_ebird_txt <- function(ebd, dest) {
+  
+  ## Open the dataset just to get the colnames -- seems wasteful
   ds <- arrow::open_dataset(ebd, format = "tsv")
   col_names <- names(ds)
   
@@ -129,7 +131,11 @@ arrow_open_ebird_txt <- function(ebd, dest) {
   sch <- do.call(arrow::schema, ebd_schema)
   
   # based on the schema defined above open tsv file for streaming
-  ds <- arrow::open_dataset(ebd, format = "tsv", schema = sch, skip_rows = 1)
+  ds <- arrow::open_dataset(ebd, 
+                            format = "tsv", 
+                            schema = sch,
+                            skip_rows = 1,
+                            null_values = c("", "X", "NA"))
   
   # clean up column names
   col_names <- names(ds)
