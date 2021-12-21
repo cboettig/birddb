@@ -3,6 +3,7 @@
 export(checklists)
 export(ebird_conn)
 export(ebird_data_dir)
+export(ebird_remote)
 export(import_ebird)
 export(observations)
 export(sample_checklist_data)

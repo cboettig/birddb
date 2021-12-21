@@ -71,7 +71,8 @@ import_ebird <- function(tarfile) {
   # confirm overwrite
   if (dir.exists(dest)) {
     if (interactive()) {
-      msg <- paste("eBird", dataset, "data already exists in BIRDDB_HOME,",
+      msg <- paste("eBird", dataset, "data already exists in",
+                   ebird_data_dir(),
                    "would you like to overwrite this data?")
       overwrite <- utils::askYesNo(msg, default = NA)
       if (!isTRUE(overwrite)) {
