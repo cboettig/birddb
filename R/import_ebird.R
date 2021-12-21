@@ -237,3 +237,9 @@ is_observations <- function(x, allow_subset = FALSE) {
   }
   return(is_obs)
 }
+
+
+
+# https://ebird.org/data/download/ebd
+# https://download.ebird.org/ebd/prepackaged/ebd_sampling_relOct-2021.tar
+# https://download.ebird.org/ebd/prepackaged/ebd_relOct-2021.tar
