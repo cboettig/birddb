@@ -35,11 +35,14 @@ ebird_conn <- function(dataset = c("observations", "checklists"),
                        memory_limit = 16) {
   
   dataset <- match.arg(dataset)
-  parquet <- ebird_parquet_files(dataset = dataset)
+  #parquet <- ebird_parquet_files(dataset = dataset)
   
   conn <- duckdb_connection(memory_limit = memory_limit,
                             cache_connection = cache_connection)
   # create the view if does not exist
+  
+  parquet <- paste0(file.path(ebird_data_dir(), dataset), "/*.parquet")
+  
   if (!dataset %in% DBI::dbListTables(conn)){
     # query to create view in duckdb to the parquet file
     view_query <- paste0("CREATE VIEW '", dataset, 
@@ -107,8 +110,6 @@ ebird_parquet_files <- function(dataset = c("observations", "checklists")) {
   # will need to modify later if partitioning is implemented
   if (length(file) == 0) {
     stop("No parquet files found in: ", dir)
-  } else if (length(file) > 1) {
-    stop("Expecting one parquet file, multiple files found in: ", dir)
   }
   
   return(file)
