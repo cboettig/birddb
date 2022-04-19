@@ -14,7 +14,7 @@ Encoding: UTF-8
 ByteCompile: true
 Depends: R (>= 4.0)
 Imports:
-    arrow (>= 6.0.0.0),
+    arrow (>= 7.0.0),
     duckdb (>= 0.2.9),
     DBI,
     dplyr,

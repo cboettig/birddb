@@ -104,7 +104,8 @@ import_ebird <- function(tarfile) {
   
   # stream to parquet
   message("Importing to parquet...")
-  arrow::write_dataset(ds, dest, format = "parquet")
+  arrow::write_dataset(ds, dest, format = "parquet", 
+                       max_rows_per_file=1000000L)
   
   # save metadata
   record_metadata(tarfile)
