@@ -153,6 +153,7 @@ ebird_col_type <- function(col_names) {
                  `TAXONOMIC ORDER` = "integer", 
                  `LATITUDE` = "double", `LONGITUDE` = "double", 
                  `OBSERVATION DATE` = "date",
+                 `OBSERVATION COUNT` = "integer",
                  `DURATION MINUTES` = "integer", 
                  `EFFORT DISTANCE KM` = "double", 
                  `EFFORT AREA HA` = "double", 

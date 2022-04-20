@@ -1,3 +1,14 @@
+ebird_arrow <- function() {
+  
+  chklst <- arrow::open_dataset( file.path(ebird_data_dir(), "checklists") )
+  obs <- arrow::open_dataset(file.path(ebird_data_dir(), "observations") )
+  
+  
+  
+}
+
+
+
 #' Set up a `DBI`-style database connection to the imported eBird data
 #' 
 #' Parquet files can be accessed as though they were relational database tables 
@@ -32,7 +43,7 @@
 #' unlink(temp_dir, recursive = TRUE)
 ebird_conn <- function(dataset = c("observations", "checklists"), 
                        cache_connection = TRUE,
-                       memory_limit = 16) {
+                       memory_limit = 6) {
   
   dataset <- match.arg(dataset)
   #parquet <- ebird_parquet_files(dataset = dataset)
